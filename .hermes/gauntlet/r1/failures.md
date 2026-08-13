@@ -56,5 +56,11 @@ User reported the game was NOT playable despite green automated suites. Investig
 - run_tests.gd: 26/26 · run_probe.gd: 12/12 · run_playtest.gd: 3/3 · run_traversal.gd: 6/6 — ALL PASS
 - Levels: 0 errors · commit 6a3a618
 
-## Recurring categories
-- (none — categories so far are one-off: physics alignment, projectile construction, pause leak, persistence, input breadth, visual distinctness, atlas geometry, level scale, test-input-fidelity)
+## HUMAN GATE ROUND 6 (2026-08-13) — "white and horizontal lines" report
+User confirmed the game showed a white screen with horizontal lines. Root cause found:
+- **P0: CRT overlay painted WHITE over the whole game.** `_spawn_crt_overlay` created a ColorRect with `color = Color(1,1,1,1)` (opaque white) on CanvasLayer layer 100 (topmost). The shader sampled `texture(TEXTURE, uv)` — but a ColorRect has NO texture, so it read WHITE, then multiplied by scanline math → white field with horizontal dark bars. The game was rendering correctly underneath; the overlay hid it. FIX: shader now outputs `vec4(0,0,0,alpha)` (transparent base, dark scanlines/vignette only); ColorRect base set to transparent. VERIFIED: frame YAVG brightness 188.8 (white) → 35.9 (dark cyberpunk bg).
+- Lesson: any full-screen ColorRect+shader overlay must output alpha-based darkening, never sample TEXTURE on a texture-less rect. Also: the movie-writer render did NOT show this bug in my earlier frames — likely because gl_compatibility + write-movie handled the overlay differently, or my frames were all sampled before overlay setup; the user's real windowed Vulkan/Metal run exposed it. This is a case where only the human gate catches rendering differences between headless/movie-writer and the real window.
+
+### Verification (post-R6)
+- YAVG brightness: 188.8 → 35.9 (white overlay eliminated)
+- run_tests 26/26 · probe 12/12 · traversal 6/6 · commit 74fa1da

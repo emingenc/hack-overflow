@@ -20,6 +20,7 @@ config/icon="res://assets/sprites/icon.svg"
 
 GameManager="*res://scripts/autoload/game_manager.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
+TouchControls="*res://scripts/ui/touch_controls.gd"
 
 [display]
 
@@ -28,6 +29,7 @@ window/size/viewport_height=720
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [input]
 
@@ -80,3 +82,4 @@ interact={
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.02, 0.03, 0.05, 1)
+textures/vram_compression/import_etc2_astc=true
