@@ -51,6 +51,14 @@ correctness/safety > usability > performance > size > polish
 - R1: full fan-out (3 roles) — 1xP0, 5xP1, 6xP2 fixed. Scores: craft 0.42, friction 0.50.
 - R2: leaner inspector — 1xP1 (tile physics offset) + 3xP2/P3 fixed. 28/28 runtime probe + 26 static tests pass.
 - R3: leaner inspector — 1xP1 (atlas separation=1 corrupted tiles) + 3xP2/P3 fixed. ALIGN PROBE 24/24, all suites green.
+- R4: CONFIRMED 0 FLOW — no new P0/P1; all 62 checks green; atlas fix runtime-verified (coherent tiles, 0px drift); test-validity proven (seeded bug → probe fails 18/24). Backlog: P2/P3 nits only. Git initialized (ea5809d).
+
+## GAUNTLET COMPLETE — 0 FLOW (round 4, 2026-08-13)
+- 3 test suites: 26 static + 12 behavioral + 24 alignment = 62 checks, all passing
+- Levels/menu: 0 errors
+- Calibration: seeded atlas bug → alignment probe fails hard (18/24) — tests are not vacuous
+- Comparison: Celeste / Hollow Knight / Glitch Hunt registered in eval-tasks registry
+- Human spot-check: pending user playtest (deferred — noted per gate 8g)
 
 ## Round 2 verification (2026-08-13)
 - Static tests: 26/26 PASS

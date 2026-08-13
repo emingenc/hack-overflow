@@ -197,6 +197,8 @@ func _camera_setup(target: Node2D) -> void:
 	var cam := Camera2D.new()
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 8.0
+	# Zoom in so the 18px pixel tiles fill the window (~3x = 54px tiles on screen).
+	cam.zoom = Vector2(3.0, 3.0)
 	cam.limit_left = 0
 	cam.limit_right = _map_pixel_width()
 	cam.limit_top = -TILE_SIZE * 4

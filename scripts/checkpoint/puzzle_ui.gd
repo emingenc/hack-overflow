@@ -238,6 +238,8 @@ func _on_submit() -> void:
 		_hint_button.disabled = true
 		_back_button.text = "ENTER NEXT SECTOR →"
 		await get_tree().create_timer(1.8).timeout
+		hide()
+		get_tree().paused = false
 		puzzle_completed.emit(true)
 	else:
 		_feedback_label.text = "✗ ACCESS DENIED\n\n" + puzzle.explanation
