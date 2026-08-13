@@ -47,7 +47,8 @@ func _spawn_crt_overlay() -> void:
 	layer.name = "CRTLayer"
 	add_child(layer)
 	var crt := ColorRect.new()
-	crt.color = Color(1, 1, 1, 1)
+	# Base color is irrelevant — the shader outputs only dark overlay alpha.
+	crt.color = Color(0, 0, 0, 0)
 	crt.set_anchors_preset(Control.PRESET_FULL_RECT)
 	crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	crt.material = ShaderMaterial.new()

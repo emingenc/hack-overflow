@@ -46,5 +46,15 @@
 - All 3 levels + menu: 0 errors
 - Leak: proven Godot headless audio-driver artifact (controlled experiment: bare player + WAV leaks identically; no-audio control = 0 leaks)
 
+## HUMAN GATE (2026-08-13) — "Can't playable" report → ROUND 5 fix
+User reported the game was NOT playable despite green automated suites. Investigation found:
+- **P0: Levels were tiny.** Maps 26 tiles x 18px = 468px wide, but window is 1280x720 and camera was clamped to map width → player was a small sprite in a huge black void (~800px dead screen). FIX: generated proper wide levels (130 tiles = 2340px, multi-height platforms, spikes, drones, turrets) via tools/gen_levels.py + camera zoom 3x so 18px tiles fill the window.
+- **P1: Game stuck paused after solving puzzle.** The correct-answer auto-path emitted puzzle_completed(true) without unpausing (only _on_back did). FIX: hide + unpause before emitting in _on_submit success path.
+- **P2: Test gap — suites never simulated real input or the full game loop.** FIX: added tests/run_playtest.gd (real key simulation: move/jump/dash) + tests/run_traversal.gd (firewall → puzzle → solve → unlock → unpause). Learned: Input.action_press() does NOT dispatch _unhandled_input — must inject InputEventKey for E-interact tests.
+
+### Verification (post-human-gate fixes)
+- run_tests.gd: 26/26 · run_probe.gd: 12/12 · run_playtest.gd: 3/3 · run_traversal.gd: 6/6 — ALL PASS
+- Levels: 0 errors · commit 6a3a618
+
 ## Recurring categories
-- (none — categories so far are one-off: physics alignment, projectile construction, pause leak, persistence, input breadth, visual distinctness, atlas geometry)
+- (none — categories so far are one-off: physics alignment, projectile construction, pause leak, persistence, input breadth, visual distinctness, atlas geometry, level scale, test-input-fidelity)

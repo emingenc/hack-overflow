@@ -1,27 +1,27 @@
 shader_type canvas_item;
 
 // CRT scanline + vignette overlay for the terminal/cyberpunk look.
-uniform float scanline_strength : hint_range(0.0, 1.0) = 0.15;
-uniform float vignette_strength : hint_range(0.0, 1.0) = 0.35;
-uniform float flicker : hint_range(0.0, 1.0) = 0.04;
+// Renders ONLY dark scanlines/vignette on a TRANSPARENT base — never white.
+uniform float scanline_strength : hint_range(0.0, 1.0) = 0.18;
+uniform float vignette_strength : hint_range(0.0, 1.0) = 0.30;
+uniform float flicker : hint_range(0.0, 1.0) = 0.03;
 uniform vec2 resolution = vec2(1280.0, 720.0);
 
 void fragment() {
 	vec2 uv = UV;
-	vec3 color = texture(TEXTURE, uv).rgb;
 
-	// Scanlines
+	// Scanlines (dark bars, transparent elsewhere)
 	float scanline = sin(uv.y * resolution.y * 0.5) * 0.5 + 0.5;
-	color *= 1.0 - scanline_strength * scanline;
+	float alpha = scanline_strength * scanline;
 
-	// Subtle flicker
-	float time_flicker = 1.0 - flicker * (0.5 + 0.5 * sin(TIME * 24.0));
-	color *= time_flicker;
-
-	// Vignette
+	// Vignette (darken corners, transparent center)
 	vec2 dist = uv - vec2(0.5);
-	float vig = 1.0 - vignette_strength * dot(dist, dist) * 2.5;
-	color *= vig;
+	float vig = vignette_strength * dot(dist, dist) * 2.5;
+	alpha += vig;
 
-	COLOR = vec4(color, 1.0);
+	// Subtle flicker on the darkening
+	float time_flicker = 1.0 - flicker * (0.5 + 0.5 * sin(TIME * 24.0));
+
+	// Black overlay at computed alpha; game pixels show through everywhere else.
+	COLOR = vec4(0.0, 0.0, 0.0, clamp(alpha * time_flicker, 0.0, 0.45));
 }
