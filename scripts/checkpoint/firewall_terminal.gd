@@ -25,6 +25,12 @@ func _ready() -> void:
 	tween.tween_property(sprite, "modulate:a", 0.7, 0.8)
 	tween.tween_property(sprite, "modulate:a", 1.0, 0.8)
 
+func _physics_process(_delta: float) -> void:
+	# Poll the action state so BOTH real key events AND virtual touch buttons
+	# (Input.action_press, which does NOT dispatch _unhandled_input) work.
+	if _in_range and _player and Input.is_action_just_pressed("interact"):
+		_open_puzzle()
+
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player:
 		_player = body
