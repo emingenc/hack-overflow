@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1786677195|1538182';
+const CACHE_VERSION = '1786677396|1473164';
 /** @type {string} */
 const CACHE_PREFIX = 'HACK://OVERFLOW-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
