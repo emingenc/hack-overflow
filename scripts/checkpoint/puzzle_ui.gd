@@ -103,7 +103,7 @@ func _build_ui() -> void:
 	var integ_label := Label.new()
 	integ_label.text = "FIREWALL INTEGRITY"
 	integ_label.add_theme_font_size_override("font_size", 12)
-	integ_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	integ_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
 	integ_row.add_child(integ_label)
 	_integrity_bar = ProgressBar.new()
 	_integrity_bar.min_value = 0.0
@@ -114,12 +114,12 @@ func _build_ui() -> void:
 	_integrity_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var integ_style := StyleBoxFlat.new()
 	integ_style.bg_color = Color(0.04, 0.08, 0.05)
-	integ_style.border_color = Color(0.3, 0.5, 0.8, 0.5)
+	integ_style.border_color = Color(0.2, 0.6, 0.3, 0.5)
 	integ_style.set_border_width_all(1)
 	integ_style.set_corner_radius_all(4)
 	_integrity_bar.add_theme_stylebox_override("background", integ_style)
 	var fill_style := StyleBoxFlat.new()
-	fill_style.bg_color = Color(0.2, 0.9, 1.0)
+	fill_style.bg_color = Color(0.2, 1.0, 0.4)
 	fill_style.set_corner_radius_all(4)
 	_integrity_bar.add_theme_stylebox_override("fill", fill_style)
 	integ_row.add_child(_integrity_bar)
@@ -200,7 +200,7 @@ func _build_ui() -> void:
 
 func _make_panel_style() -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.07, 0.1, 0.22, 0.97)
+	sb.bg_color = Color(0.04, 0.09, 0.05, 0.97)
 	sb.border_color = Color(0.0, 1.0, 0.25, 0.5)
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(10)
@@ -429,7 +429,7 @@ func _on_submit_mcq() -> void:
 		for i in range(_options_box.get_child_count()):
 			var btn := _options_box.get_child(i) as Button
 			var is_correct: bool = (i == int(puzzle.correct_index))
-			btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6) if is_correct else Color(0.5, 0.5, 0.55))
+			btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6) if is_correct else Color(0.45, 0.55, 0.45))
 			btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.1, 0.2, 0.15) if is_correct else Color(0.05, 0.12, 0.07)))
 		_submit_button.disabled = true
 		_hint_button.disabled = true
@@ -573,7 +573,7 @@ func _drain_integrity(amount: float) -> bool:
 	_integrity = maxf(0.0, _integrity - amount)
 	_integrity_bar.value = _integrity
 	# Color shift as it drains: cyan → amber → red.
-	var c := Color(0.2, 0.9, 1.0)
+	var c := Color(0.2, 1.0, 0.4)
 	if _integrity < 0.5:
 		c = Color(1.0, 0.6, 0.2)
 	if _integrity <= 0.0:

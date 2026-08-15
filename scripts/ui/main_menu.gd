@@ -118,7 +118,7 @@ func _build_ui() -> void:
 	quit_btn.text = "QUIT"
 	quit_btn.custom_minimum_size = Vector2(200, 38)
 	quit_btn.pressed.connect(func() -> void: get_tree().quit())
-	quit_btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.09, 0.06), Color(0.4, 0.4, 0.5, 0.15)))
+	quit_btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.09, 0.06), Color(0.3, 0.45, 0.3, 0.15)))
 	quit_btn.add_theme_stylebox_override("hover", _style(Color(0.04, 0.12, 0.08), Color(0.0, 1.0, 0.25, 0.35)))
 	quit_btn.add_theme_stylebox_override("pressed", _style(Color(0.03, 0.06, 0.04), Color(0.0, 1.0, 0.25, 0.5)))
 	center.add_child(quit_btn)
@@ -142,7 +142,7 @@ func _rebuild_levels() -> void:
 		else:
 			btn.text = "⛨  " + names[i] + "   —  solve previous sector"
 			btn.disabled = true
-			btn.add_theme_stylebox_override("normal", _style(Color(0.03, 0.06, 0.04), Color(0.2, 0.3, 0.4, 0.15)))
+			btn.add_theme_stylebox_override("normal", _style(Color(0.03, 0.06, 0.04), Color(0.2, 0.35, 0.25, 0.15)))
 			btn.add_theme_color_override("font_color", Color(0.25, 0.5, 0.3))
 		btn.add_theme_font_size_override("font_size", 18)
 		_levels_box.add_child(btn)
