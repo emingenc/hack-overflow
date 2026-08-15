@@ -162,6 +162,8 @@ func _update_animation() -> void:
 		anim.play("idle")
 
 func _spawn_dust() -> void:
+	if not Settings.particles_enabled:
+		return
 	# Simple dust puff via CPUParticles2D at feet
 	var p := CPUParticles2D.new()
 	p.one_shot = true

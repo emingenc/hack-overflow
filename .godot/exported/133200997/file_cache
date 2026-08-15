@@ -2,7 +2,7 @@ res://scenes/levels/level_01_terminal.tscn::e3e28447158f6b651edd8a051b912622::17
 res://scenes/levels/level_02_servers.tscn::f661e75360e5382e53bf9128ebf1082e::1786665878::res://.godot/exported/133200997/export-10af6a43f192c16980546776d371a836-level_02_servers.scn
 res://scenes/levels/level_03_core.tscn::86cce4b6094295bd09ad2a7fb356dac2::1786665878::res://.godot/exported/133200997/export-1e1b1f03fff219a95ac8a7dc09e9c9e4-level_03_core.scn
 res://scenes/main_menu.tscn::2cc992ea66610aa8162265468798846d::1786665878::res://.godot/exported/133200997/export-ea5c6ad4629af728dc514cefde332394-main_menu.scn
-res://scenes/player.tscn::5ea6714be22510891efd83b71da23ef8::1786665878::res://.godot/exported/133200997/export-234fb6894ec6226e856ab7f825500d3d-player.scn
+res://scenes/player.tscn::3173e726bbee67f4ab3d9d6bb9957988::1786769231::res://.godot/exported/133200997/export-234fb6894ec6226e856ab7f825500d3d-player.scn
 res://scenes/qa_capture.tscn::eaafcbbdc42a0963fedaec43bd9cf0d9::1786665878::res://.godot/exported/133200997/export-6fb216fbb4b3ce826ad55fcccf5c0840-qa_capture.scn
 res://scenes/qa_capture_ev.tscn::4e38a69423569d97c42a5691d20dccb8::1786665878::res://.godot/exported/133200997/export-b5fd6664c437678a2eb90eef04b06783-qa_capture_ev.scn
 res://scenes/qa_ev_debug.tscn::7bae09e7498013f73615d059cbdd29e6::1786665878::res://.godot/exported/133200997/export-89cda77eb400c9575ee8bb5368945366-qa_ev_debug.scn
@@ -11,6 +11,7 @@ res://tests/playtest_runner.tscn::39e2e2e7f17678e3bee139224b623dd4::1786665878::
 res://tests/probe_runner.tscn::adf2c2c790f1f668f079cefd39999dd6::1786665878::res://.godot/exported/133200997/export-3fffa24f6791ed0c74588901f46d9260-probe_runner.scn
 res://tests/traversal_runner.tscn::aaa5e0c849604bb1829bfbaf60c169f7::1786665878::res://.godot/exported/133200997/export-cdf11a7c01d4e65bd6dbc4d5276a87e5-traversal_runner.scn
 res://tests/touch_traversal_runner.tscn::80a5d745ebd26de368f00b674cb99b27::1786665879::res://.godot/exported/133200997/export-146e3b9331e41ac4e533b7ed3e670e26-touch_traversal_runner.scn
-res://assets/theme_cyber.tres::1687a3e9ef8599049bb0fa78c586a333::1786677148::res://.godot/exported/133200997/export-0da299b0c88a658d918e56b06c59e00d-theme_cyber.res
+res://assets/theme_cyber.tres::d4b0237ee63d934af04d1ac7270322b9::1786770571::res://.godot/exported/133200997/export-0da299b0c88a658d918e56b06c59e00d-theme_cyber.res
 res://tests/_mobile_ux_probe_runner_tmp.tscn::f8ea76f9bae6b78e8736b283efde255e::1786676593::res://.godot/exported/133200997/export-57fca09bcb1e2413f87f4126224a5047-_mobile_ux_probe_runner_tmp.scn
 res://tests/task_formats_runner.tscn::4662670e8a90979be29f0e84b7785a67::1786756766::res://.godot/exported/133200997/export-2910ddc80130e3213c86a1971f1c31a7-task_formats_runner.scn
+res://tests/integrity_runner.tscn::aa608f83cb2266c9081e95475788d0e8::1786770560::res://.godot/exported/133200997/export-b3b1af05ee26148da50f6d82f6349281-integrity_runner.scn

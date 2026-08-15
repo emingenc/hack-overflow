@@ -52,6 +52,8 @@ func _spawn_matrix_rain() -> void:
 
 ## Ambient rising data sparks (additive green dots) — the world is streaming data.
 func _spawn_ambient_particles() -> void:
+	if not Settings.particles_enabled:
+		return
 	var p := GPUParticles2D.new()
 	p.amount = 48
 	p.lifetime = 3.0
@@ -127,12 +129,13 @@ func _process(delta: float) -> void:
 	_update_parallax()
 	_update_camera(delta)
 
-## Scrolls the two background layers relative to the player so they feel deep.
+## Scrolls the two background layers relative to the camera so they feel deep.
 func _update_parallax() -> void:
-	if not player:
+	if not Settings.background_parallax_enabled:
 		return
-	var cam := player.get_node_or_null("Camera2D") as Camera2D
-	var cam_pos: Vector2 = cam.global_position if cam else player.global_position
+	if _cam == null or not is_instance_valid(_cam):
+		return
+	var cam_pos: Vector2 = _cam.global_position
 	var sky := get_node_or_null("ParallaxSky")
 	var grid := get_node_or_null("ParallaxGrid")
 	if sky:
@@ -459,7 +462,10 @@ func _on_player_died() -> void:
 	if not _respawn_initialized:
 		get_tree().reload_current_scene()
 		return
-	_spawn_player_at(_respawn_point)
+	player = null  # dead player is being freed; clear the ref so the camera holds
+	# Delay respawn past the death hitstop so the frozen death beat is visible.
+	get_tree().create_timer(0.1).timeout.connect(func() -> void:
+		_spawn_player_at(_respawn_point))
 
 func _spawn_player_at(pos: Vector2) -> void:
 	var scene := preload("res://scenes/player.tscn")
