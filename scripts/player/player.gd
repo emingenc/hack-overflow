@@ -16,7 +16,8 @@ const JUMP_VELOCITY: float = -560.0
 const JUMP_CUT_MULTIPLIER: float = 0.45
 const MAX_FALL_SPEED: float = 900.0
 const COYOTE_TIME: float = 0.12
-const JUMP_BUFFER_TIME: float = 0.15
+const JUMP_BUFFER_TIME: float = 0.12
+const BASE_SCALE: Vector2 = Vector2(0.75, 0.75)  # scene Sprite2D base scale
 const DASH_SPEED: float = 520.0
 const DASH_TIME: float = 0.16
 const DASH_COOLDOWN: float = 0.45
@@ -38,6 +39,7 @@ var is_dashing: bool = false
 var facing: int = 1  # 1 = right, -1 = left
 var gravity: float = 1500.0
 var fall_speed_at_impact: float = 0.0
+var _squash_tween: Tween = null
 
 func _ready() -> void:
 	dust_timer.timeout.connect(func() -> void: _spawn_dust())
@@ -45,6 +47,13 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
+
+	# Jump buffer is polled first so a dash can't eat the input; it freezes during
+	# the dash so buffered dash→jump chains still fire when the dash ends.
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = JUMP_BUFFER_TIME
+	elif not is_dashing:
+		jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
 
 	# ── Dash ──────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("dash") and can_dash and dash_cooldown_timer <= 0.0:
@@ -58,6 +67,7 @@ func _physics_process(delta: float) -> void:
 		velocity = dash_dir * DASH_SPEED
 		if dash_timer <= 0.0:
 			is_dashing = false
+			dash_trail.emitting = false
 			velocity.x = dash_dir.x * SPEED * 0.6
 		move_and_slide()
 		return
@@ -85,21 +95,15 @@ func _physics_process(delta: float) -> void:
 	# ── Jumping state machines ────────────────────────────────────
 	if is_on_floor():
 		coyote_timer = COYOTE_TIME
-		jumps_remaining = 2
+		jumps_remaining = 1  # one air jump on top of the ground jump
 	else:
 		coyote_timer = maxf(0.0, coyote_timer - delta)
 
-	if Input.is_action_just_pressed("jump"):
-		jump_buffer_timer = JUMP_BUFFER_TIME
-	else:
-		jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
-
-	# Buffered + coyote jump
+	# Buffered + coyote jump (ground)
 	if jump_buffer_timer > 0.0 and coyote_timer > 0.0:
 		velocity.y = JUMP_VELOCITY
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
-		jumps_remaining = 1  # consumed ground jump
 		_spawn_dust()
 		AudioManager.play("jump")
 		_squash(Vector2(0.6, 1.4), 0.08)
@@ -129,8 +133,8 @@ func _physics_process(delta: float) -> void:
 		var impact := clampf(fall_speed_at_impact / MAX_FALL_SPEED, 0.0, 1.0)
 		_squash(Vector2(1.0 + 0.5 * impact, 1.0 - 0.4 * impact), 0.07)
 		if impact > 0.6:
-			_add_trauma(0.15 * impact)
-			Hitstop.freeze(0.02)
+			_add_trauma(0.3 * impact)
+			Hitstop.freeze(0.05)
 	was_on_floor = is_on_floor()
 
 func _start_dash() -> void:
@@ -138,14 +142,15 @@ func _start_dash() -> void:
 	dash_timer = DASH_TIME
 	can_dash = false
 	dash_cooldown_timer = DASH_COOLDOWN
-	dash_trail.emitting = true
+	dash_trail.restart()
 	AudioManager.play("dash")
 	Hitstop.freeze(0.04)
-	_add_trauma(0.2)
+	_add_trauma(0.35)
 	_squash(Vector2(1.3, 0.7), 0.12)
 	# Refill happens on landing (see _physics_process).
 
 func _update_animation() -> void:
+	sprite.flip_h = facing < 0
 	if is_dashing:
 		anim.play("dash")
 		return
@@ -155,7 +160,6 @@ func _update_animation() -> void:
 		anim.play("run")
 	else:
 		anim.play("idle")
-	sprite.flip_h = facing < 0
 
 func _spawn_dust() -> void:
 	# Simple dust puff via CPUParticles2D at feet
@@ -178,13 +182,15 @@ func _spawn_dust() -> void:
 	add_child(p)
 
 ## Squash-and-stretch: fast ease-out scale, then settle (2026 norm — no slow wobble).
-## Direction handled by `flip_h`, so scale is always positive here.
+## Scales relative to BASE_SCALE (scene scale 0.75) so it never inflates the sprite.
 func _squash(scale: Vector2, duration: float) -> void:
 	if Settings.reduced_motion:
 		return
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(sprite, "scale", Vector2.ONE, duration * 2.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	if _squash_tween and _squash_tween.is_valid():
+		_squash_tween.kill()
+	_squash_tween = create_tween()
+	_squash_tween.tween_property(sprite, "scale", BASE_SCALE * scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_squash_tween.tween_property(sprite, "scale", BASE_SCALE, duration * 2.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 ## Route screen-shake to the owning level (the player's parent).
 func _add_trauma(amount: float) -> void:

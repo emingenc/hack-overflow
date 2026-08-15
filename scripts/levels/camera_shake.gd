@@ -4,7 +4,7 @@ extends Node
 ## Attached as a child of the Camera2D; the camera is the `get_parent()`.
 
 const DECAY: float = 1.5          # trauma lost per second
-const MAX_OFFSET: float = 14.0    # px
+const MAX_OFFSET: float = 28.0    # px (dash 0.35 → ~3.4px world ≈ 10px screen at 3x zoom)
 const MAX_ROTATION: float = 0.2   # degrees — kept subtle
 
 var trauma: float = 0.0
@@ -16,6 +16,8 @@ func add_trauma(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
 
 func _process(delta: float) -> void:
+	if Settings.reduced_motion:
+		trauma = 0.0  # stop an in-flight shake immediately
 	var cam := get_parent() as Camera2D
 	if cam == null:
 		return

@@ -56,7 +56,7 @@ func _build_ui() -> void:
 	_title.add_theme_font_size_override("font_size", 44)
 	_title.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P-Regular.ttf"))
 	_title.add_theme_color_override("font_color", Color(0.1, 1.0, 0.3))
-	_title.add_theme_color_override("font_shadow_color", Color(0.0, 0.4, 0.6, 0.8))
+	_title.add_theme_color_override("font_shadow_color", Color(0.0, 0.3, 0.15, 0.8))
 	_title.add_theme_constant_override("shadow_offset_x", 3)
 	_title.add_theme_constant_override("shadow_offset_y", 3)
 	center.add_child(_title)

@@ -42,7 +42,7 @@ void fragment() {
 	else                  { g = clamp(bar + step(abs(cuv.x - (0.7 + xoff)), 0.05), 0.0, 1.0); }
 
 	// Head glyph glows bright white-green; trail fades to dim green.
-	vec3 col = mix(vec3(0.02, 0.35, 0.18), vec3(0.65, 1.0, 0.9), smoothstep(0.88, 1.0, head));
+	vec3 col = mix(vec3(0.02, 0.35, 0.18), vec3(0.8, 1.0, 0.7), smoothstep(0.88, 1.0, head));
 	col *= g * trail * max_alpha;
 	COLOR = vec4(col, col.g * 0.9);
 }

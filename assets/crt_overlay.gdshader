@@ -17,14 +17,22 @@ float hash21(vec2 p) {
 void fragment() {
 	vec3 base = texture(screen_texture, SCREEN_UV).rgb;
 
-	// Whole-screen bloom: add a blurred (high-LOD) copy back on itself.
-	vec3 col = base + textureLod(screen_texture, SCREEN_UV, 3.0).rgb * bloom_strength;
+	// Whole-screen bloom: radial multi-tap blur (gl_compatibility has no screen
+	// mipmaps, so textureLod is a no-op — sample two rings instead).
+	vec3 blur = vec3(0.0);
+	for (int i = 0; i < 8; i++) {
+		float ang = float(i) * 6.28318 / 8.0;
+		vec2 dir = vec2(cos(ang), sin(ang));
+		blur += texture(screen_texture, SCREEN_UV + dir * 0.004).rgb;
+		blur += texture(screen_texture, SCREEN_UV + dir * 0.011).rgb;
+	}
+	vec3 col = base + (blur / 16.0) * bloom_strength;
 
 	// Flat scanlines (LED-panel, no curvature — the 2026 read).
 	col *= 1.0 - scanline_strength * (0.5 + 0.5 * sin(SCREEN_UV.y * 6.28318 * 720.0 / 3.5));
 
-	// Blue-noise dither (compat has no debanding).
-	col += (hash21(floor(SCREEN_UV / SCREEN_PIXEL_SIZE) + vec2(TIME * 30.0)) - 0.5) * dither_strength / 255.0;
+	// Static dither (compat has no debanding); time-invariant so it never boils.
+	col += (hash21(floor(SCREEN_UV / SCREEN_PIXEL_SIZE)) - 0.5) * dither_strength / 255.0;
 
 	// Subtle vignette.
 	vec2 d = SCREEN_UV - vec2(0.5);

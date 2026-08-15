@@ -125,7 +125,7 @@ func _process(delta: float) -> void:
 	if _level_active and not _completed:
 		_level_time += delta
 	_update_parallax()
-	_update_camera()
+	_update_camera(delta)
 
 ## Scrolls the two background layers relative to the player so they feel deep.
 func _update_parallax() -> void:
@@ -239,23 +239,17 @@ func _spawn_player(cell: Vector2i) -> void:
 	_camera_setup(player)
 
 func _camera_setup(target: Node2D) -> void:
+	if _cam and is_instance_valid(_cam):
+		_cam.queue_free()  # drop the previous camera on respawn
 	var cam := Camera2D.new()
-	cam.position_smoothing_enabled = true
-	cam.position_smoothing_speed = 8.0
 	# Zoom in so the 18px pixel tiles fill the window (~3x = 54px tiles on screen).
 	cam.zoom = Vector2(3.0, 3.0)
 	cam.limit_left = 0
 	cam.limit_right = _map_pixel_width()
 	cam.limit_top = -TILE_SIZE * 4
 	cam.limit_bottom = _map_pixel_height() + TILE_SIZE * 4
-	# Drag-margin deadzone: camera advances only when the player pushes the window edge.
-	cam.drag_horizontal_enabled = true
-	cam.drag_left_margin = 0.32
-	cam.drag_right_margin = 0.28
-	cam.drag_vertical_enabled = true
-	cam.drag_top_margin = 0.25
-	cam.drag_bottom_margin = 0.20
-	target.add_child(cam)
+	add_child(cam)  # sibling of the player → real deadzone is possible
+	cam.position = target.position
 	cam.make_current()
 	_cam = cam
 	# Trauma² screen shake, child of the camera so it composes with smoothing.
@@ -263,13 +257,27 @@ func _camera_setup(target: Node2D) -> void:
 	_shake.name = "CameraShake"
 	cam.add_child(_shake)
 
-## Lookahead (projected focus) + speed-based smoothing for the follow camera.
-func _update_camera() -> void:
+const CAM_DEADZONE := Vector2(60.0, 40.0)
+const CAM_LOOKAHEAD := 44.0
+
+## Manual follow: deadzone + speed-based smoothing + facing lookahead.
+func _update_camera(delta: float) -> void:
 	if _cam == null or not is_instance_valid(_cam) or player == null:
 		return
-	var speed_ratio: float = clampf(absf(player.velocity.x) / 260.0, 0.0, 1.0)
-	_cam.position_smoothing_speed = lerpf(4.0, 12.0, speed_ratio)
-	_cam.drag_horizontal_offset = lerpf(_cam.drag_horizontal_offset, player.facing * 60.0, 6.0 * get_process_delta_time())
+	var desired := player.global_position + Vector2(player.facing * CAM_LOOKAHEAD, -12.0)
+	var diff := desired - _cam.position
+	# Deadzone: ignore motion inside the box, track the excess outside it.
+	if absf(diff.x) <= CAM_DEADZONE.x:
+		diff.x = 0.0
+	else:
+		diff.x -= signf(diff.x) * CAM_DEADZONE.x
+	if absf(diff.y) <= CAM_DEADZONE.y:
+		diff.y = 0.0
+	else:
+		diff.y -= signf(diff.y) * CAM_DEADZONE.y
+	var speed_ratio: float = clampf(absf(player.velocity.x) / Player.SPEED, 0.0, 1.0)
+	var smooth: float = lerpf(6.0, 14.0, speed_ratio)
+	_cam.position += diff * clampf(smooth * delta, 0.0, 1.0)
 
 ## Trauma² screen-shake entry point (called by the player on impact/dash/death).
 func add_trauma(amount: float) -> void:
@@ -417,7 +425,16 @@ func _on_puzzle_started(_level_idx: int) -> void:
 	if _puzzle_ui:
 		if not _puzzle_ui.puzzle_completed.is_connected(_on_puzzle_completed):
 			_puzzle_ui.puzzle_completed.connect(_on_puzzle_completed)
-		_puzzle_ui.show_puzzle(GameManager.get_puzzle_for_level(level_index))
+		if not _puzzle_ui.puzzle_locked.is_connected(_on_puzzle_locked):
+			_puzzle_ui.puzzle_locked.connect(_on_puzzle_locked)
+		_puzzle_ui.show_puzzle(GameManager.get_puzzle_for_level(level_index), level_index)
+
+func _on_puzzle_locked() -> void:
+	# Integrity exhausted → close the puzzle and respawn at the terminal checkpoint.
+	if _puzzle_ui:
+		_puzzle_ui.hide()
+		get_tree().paused = false
+	_spawn_player_at(_respawn_point)
 
 func _on_puzzle_completed(success: bool) -> void:
 	if success and exit_portal:

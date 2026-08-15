@@ -32,6 +32,12 @@ var _order_placed: Array[int] = []  # index into shuffled_steps per slot, -1 = e
 var _steps_correct: int = 0
 var _steps_total: int = 0
 var _slot_buttons: Array[Button] = []
+# Firewall integrity: wrong answer -30%, hint -15%; at 0 the terminal locks
+# (level_index 0 never locks — forgiving first sector).
+var _integrity: float = 1.0
+var _level_index: int = 0
+var _integrity_bar: ProgressBar
+signal puzzle_locked
 
 func _ready() -> void:
 	_build_ui()
@@ -90,6 +96,34 @@ func _build_ui() -> void:
 	_attempts_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
 	header.add_child(_attempts_label)
 
+	# Firewall integrity bar (diegetic consequence: wrong answers drain it).
+	var integ_row := HBoxContainer.new()
+	integ_row.add_theme_constant_override("separation", 10)
+	vbox.add_child(integ_row)
+	var integ_label := Label.new()
+	integ_label.text = "FIREWALL INTEGRITY"
+	integ_label.add_theme_font_size_override("font_size", 12)
+	integ_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	integ_row.add_child(integ_label)
+	_integrity_bar = ProgressBar.new()
+	_integrity_bar.min_value = 0.0
+	_integrity_bar.max_value = 1.0
+	_integrity_bar.value = 1.0
+	_integrity_bar.show_percentage = false
+	_integrity_bar.custom_minimum_size = Vector2(0, 18)
+	_integrity_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var integ_style := StyleBoxFlat.new()
+	integ_style.bg_color = Color(0.04, 0.08, 0.05)
+	integ_style.border_color = Color(0.3, 0.5, 0.8, 0.5)
+	integ_style.set_border_width_all(1)
+	integ_style.set_corner_radius_all(4)
+	_integrity_bar.add_theme_stylebox_override("background", integ_style)
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = Color(0.2, 0.9, 1.0)
+	fill_style.set_corner_radius_all(4)
+	_integrity_bar.add_theme_stylebox_override("fill", fill_style)
+	integ_row.add_child(_integrity_bar)
+
 	var hline := HSeparator.new()
 	vbox.add_child(hline)
 
@@ -114,7 +148,7 @@ func _build_ui() -> void:
 	var options_label := Label.new()
 	options_label.text = "CHOOSE YOUR APPROACH:"
 	options_label.add_theme_font_size_override("font_size", 13)
-	options_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9))
+	options_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
 	vbox.add_child(options_label)
 
 	_options_box = VBoxContainer.new()
@@ -160,7 +194,7 @@ func _build_ui() -> void:
 	_submit_button.text = "SUBMIT ANSWER"
 	_submit_button.pressed.connect(_on_submit)
 	_submit_button.disabled = true
-	_submit_button.add_theme_color_override("font_color", Color(0.1, 0.1, 0.15))
+	_submit_button.add_theme_color_override("font_color", Color(0.08, 0.12, 0.08))
 	_submit_button.add_theme_stylebox_override("normal", _make_button_style(Color(0.4, 1.0, 0.6)))
 	btn_row.add_child(_submit_button)
 
@@ -184,8 +218,11 @@ func _make_button_style(color: Color) -> StyleBoxFlat:
 	sb.content_margin_bottom = 10
 	return sb
 
-func show_puzzle(data: Dictionary) -> void:
+func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 	puzzle = data
+	_level_index = level_index
+	_integrity = 1.0
+	_integrity_bar.value = _integrity
 	_selected = -1
 	_answered = false
 	_attempts = 0
@@ -239,9 +276,9 @@ func _make_option_button(text: String, i: int) -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 56)
 	btn.add_theme_font_size_override("font_size", 18)
-	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
-	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.16, 0.22, 0.45)))
-	btn.add_theme_stylebox_override("pressed", _make_button_style(Color(0.1, 0.13, 0.3)))
+	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.16, 0.09)))
+	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.08, 0.2, 0.1)))
+	btn.add_theme_stylebox_override("pressed", _make_button_style(Color(0.05, 0.14, 0.08)))
 	return btn
 
 ## ── TRACE: dry-run a sequence of steps ───────────────────────────────
@@ -288,7 +325,7 @@ func _build_order() -> void:
 	var pool_label := Label.new()
 	pool_label.text = "SCRAMBLED:"
 	pool_label.add_theme_font_size_override("font_size", 14)
-	pool_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9))
+	pool_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
 	pool.add_child(pool_label)
 	for i in range(shuffled.size()):
 		var btn := _make_order_step_button(shuffled[i])
@@ -302,7 +339,7 @@ func _build_order() -> void:
 	var slot_label := Label.new()
 	slot_label.text = "SEQUENCE:"
 	slot_label.add_theme_font_size_override("font_size", 14)
-	slot_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9))
+	slot_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
 	slots.add_child(slot_label)
 	_slot_buttons = []
 	for s in range(correct.size()):
@@ -311,8 +348,8 @@ func _build_order() -> void:
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.custom_minimum_size = Vector2(0, 52)
 		btn.add_theme_font_size_override("font_size", 16)
-		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.08, 0.1, 0.2)))
-		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.12, 0.16, 0.3)))
+		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.04, 0.1, 0.06)))
+		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.06, 0.16, 0.09)))
 		btn.pressed.connect(_on_order_slot_pressed.bind(s))
 		slots.add_child(btn)
 		_slot_buttons.append(btn)
@@ -324,8 +361,8 @@ func _make_order_step_button(text: String) -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 52)
 	btn.add_theme_font_size_override("font_size", 15)
-	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
-	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.16, 0.22, 0.45)))
+	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.16, 0.09)))
+	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.08, 0.2, 0.1)))
 	return btn
 
 func _on_order_pool_pressed(step_idx: int) -> void:
@@ -348,7 +385,7 @@ func _refresh_order_slots() -> void:
 		var idx: int = _order_placed[s]
 		if idx == -1:
 			_slot_buttons[s].text = "%d.  [ empty ]" % (s + 1)
-			_slot_buttons[s].add_theme_color_override("font_color", Color(0.6, 0.65, 0.75))
+			_slot_buttons[s].add_theme_color_override("font_color", Color(0.55, 0.8, 0.55))
 		else:
 			_slot_buttons[s].text = "%d.  %s" % [s + 1, shuffled[idx]]
 			_slot_buttons[s].add_theme_color_override("font_color", Color(0.85, 1.0, 0.7))
@@ -364,7 +401,7 @@ func _on_option_pressed(index: int) -> void:
 		var btn := _options_box.get_child(i) as Button
 		var selected := i == index
 		btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.7) if selected else Color(0.8, 1.0, 0.65))
-		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.14, 0.2, 0.4) if selected else Color(0.12, 0.16, 0.35)))
+		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.07, 0.18, 0.1) if selected else Color(0.06, 0.16, 0.09)))
 
 func _on_submit() -> void:
 	match _task_type:
@@ -393,7 +430,7 @@ func _on_submit_mcq() -> void:
 			var btn := _options_box.get_child(i) as Button
 			var is_correct: bool = (i == int(puzzle.correct_index))
 			btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6) if is_correct else Color(0.5, 0.5, 0.55))
-			btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.1, 0.2, 0.15) if is_correct else Color(0.1, 0.12, 0.25)))
+			btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.1, 0.2, 0.15) if is_correct else Color(0.05, 0.12, 0.07)))
 		_submit_button.disabled = true
 		_hint_button.disabled = true
 		_back_button.text = "CONTINUE →"
@@ -402,6 +439,7 @@ func _on_submit_mcq() -> void:
 		_feedback_label.text = "✗ ACCESS DENIED\n\n" + puzzle.explanation
 		_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 		AudioManager.play("wrong")
+		_drain_integrity(0.30)
 		_locked_options.append(_selected)
 		for i in range(_options_box.get_child_count()):
 			var btn := _options_box.get_child(i) as Button
@@ -414,7 +452,7 @@ func _on_submit_mcq() -> void:
 			else:
 				btn.disabled = false
 				btn.add_theme_color_override("font_color", Color(0.8, 1.0, 0.65))
-				btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
+				btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.16, 0.09)))
 		_selected = -1
 		_submit_button.disabled = true
 		_answered = false
@@ -474,6 +512,7 @@ func _on_submit_trace() -> void:
 		_feedback_label.text = "✗ " + step.get("explanation", "") + "\n\nTry again."
 		_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 		AudioManager.play("wrong")
+		_drain_integrity(0.30)
 		_selected = -1
 		_submit_button.disabled = true
 		_answered = false
@@ -525,10 +564,40 @@ func _on_submit_order() -> void:
 			_feedback_label.text = "Some slots are out of order — review and retry."
 		_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 		AudioManager.play("wrong")
+		_drain_integrity(0.30)
 		_answered = false
 		_submit_button.disabled = false
 
+## Drain firewall integrity. Returns true if the terminal locked (integrity 0).
+func _drain_integrity(amount: float) -> bool:
+	_integrity = maxf(0.0, _integrity - amount)
+	_integrity_bar.value = _integrity
+	# Color shift as it drains: cyan → amber → red.
+	var c := Color(0.2, 0.9, 1.0)
+	if _integrity < 0.5:
+		c = Color(1.0, 0.6, 0.2)
+	if _integrity <= 0.0:
+		c = Color(1.0, 0.2, 0.2)
+	var fill := _integrity_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	if fill:
+		fill.bg_color = c
+	if _integrity <= 0.0 and _level_index > 0:
+		_lock_terminal()
+		return true
+	return false
+
+func _lock_terminal() -> void:
+	_feedback_label.text = "⚠ FIREWALL LOCKED — integrity exhausted.\nRe-approach the terminal and try again."
+	_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
+	_submit_button.disabled = true
+	_hint_button.disabled = true
+	AudioManager.play("wrong")
+	puzzle_locked.emit()
+
 func _on_hint() -> void:
+	# Hints cost integrity — showing the nudge drains the firewall.
+	if not _show_hint:
+		_drain_integrity(0.15)
 	_show_hint = not _show_hint
 	if _show_hint:
 		_hint_label.text = ">> " + puzzle.hint
