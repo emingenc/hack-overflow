@@ -24,7 +24,6 @@ const DASH_COOLDOWN: float = 0.45
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var anim: AnimationPlayer = $AnimationPlayer
-@onready var dust_timer: Timer = $DustTimer
 @onready var dash_trail: CPUParticles2D = $DashTrail
 
 var coyote_timer: float = 0.0
@@ -42,7 +41,6 @@ var fall_speed_at_impact: float = 0.0
 var _squash_tween: Tween = null
 
 func _ready() -> void:
-	dust_timer.timeout.connect(func() -> void: _spawn_dust())
 	dash_trail.emitting = false
 
 func _physics_process(delta: float) -> void:

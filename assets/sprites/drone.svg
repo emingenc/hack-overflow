@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="24" viewBox="0 0 32 24">
   <!-- top rotor -->
-  <rect x="13" y="0" width="6" height="3" rx="1.5" fill="#ff3b5c"/>
+  <rect x="13" y="0" width="6" height="3" rx="1.5" fill="#ff3b30"/>
   <!-- body -->
   <ellipse cx="16" cy="12" rx="9" ry="7" fill="#1a0a12"/>
-  <ellipse cx="16" cy="12" rx="9" ry="7" fill="none" stroke="#ff3b5c" stroke-width="1.5"/>
+  <ellipse cx="16" cy="12" rx="9" ry="7" fill="none" stroke="#ff3b30" stroke-width="1.5"/>
   <ellipse cx="16" cy="11" rx="7" ry="5" fill="#2a0f1c"/>
   <!-- sensor eye -->
-  <circle cx="16" cy="12" r="3" fill="#ff3b5c"/>
+  <circle cx="16" cy="12" r="3" fill="#ff3b30"/>
   <circle cx="16" cy="12" r="1.5" fill="#fff"/>
   <!-- warning lights -->
-  <circle cx="7" cy="6" r="1.2" fill="#ff3b5c"/>
-  <circle cx="25" cy="6" r="1.2" fill="#ff3b5c"/>
+  <circle cx="7" cy="6" r="1.2" fill="#ff3b30"/>
+  <circle cx="25" cy="6" r="1.2" fill="#ff3b30"/>
   <!-- side antennae -->
-  <path d="M7 12 L3 9 M25 12 L29 9" stroke="#ff3b5c" stroke-width="1.5"/>
+  <path d="M7 12 L3 9 M25 12 L29 9" stroke="#ff3b30" stroke-width="1.5"/>
   <!-- hover thruster -->
-  <ellipse cx="16" cy="19" rx="4" ry="1.5" fill="#ff3b5c" opacity="0.4"/>
+  <ellipse cx="16" cy="19" rx="4" ry="1.5" fill="#ff3b30" opacity="0.4"/>
 </svg>

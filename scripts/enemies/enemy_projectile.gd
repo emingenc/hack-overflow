@@ -10,7 +10,7 @@ func _ready() -> void:
 	var spr := Sprite2D.new()
 	spr.texture = preload("res://assets/sprites/chip.svg")
 	spr.scale = Vector2(0.35, 0.35)
-	spr.modulate = Color(1.0, 0.35, 0.4)
+	spr.modulate = Color(1.0, 0.22, 0.18)
 	spr.name = "Sprite2D"
 	add_child(spr)
 

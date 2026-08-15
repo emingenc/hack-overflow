@@ -8,6 +8,22 @@ var _glow: ColorRect
 
 func _ready() -> void:
 	_build_ui()
+	_spawn_post()
+
+## Full-screen post stack (matches the in-level look: bloom + scanlines + dither + vignette).
+func _spawn_post() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	layer.name = "CRTLayer"
+	add_child(layer)
+	var crt := ColorRect.new()
+	crt.color = Color.WHITE
+	crt.set_anchors_preset(Control.PRESET_FULL_RECT)
+	crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	crt.material = ShaderMaterial.new()
+	crt.material.shader = preload("res://assets/crt_overlay.gdshader")
+	crt.name = "CRTOverlay"
+	layer.add_child(crt)
 
 func _process(delta: float) -> void:
 	_t += delta
@@ -31,7 +47,7 @@ func _build_ui() -> void:
 	add_child(bg_img)
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.03, 0.06, 0.82)
+	bg.color = Color(0.02, 0.03, 0.02, 0.82)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
