@@ -60,10 +60,15 @@ func _build_ui() -> void:
 	add_child(_glow)
 
 	var center := VBoxContainer.new()
-	center.set_anchors_preset(Control.PRESET_CENTER)
 	center.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_theme_constant_override("separation", 16)
-	add_child(center)
+	# Center both axes via a full-rect CenterContainer wrapper (PRESET_CENTER alone
+	# leaves a zero-sized point and the block drifts to the top-left).
+	var center_wrap := CenterContainer.new()
+	center_wrap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center_wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(center_wrap)
+	center_wrap.add_child(center)
 
 	# Title with layered glow (drop-shadow feel)
 	_title = Label.new()
@@ -116,11 +121,8 @@ func _build_ui() -> void:
 
 	var quit_btn := Button.new()
 	quit_btn.text = "QUIT"
-	quit_btn.custom_minimum_size = Vector2(200, 38)
+	quit_btn.custom_minimum_size = Vector2(200, 48)
 	quit_btn.pressed.connect(func() -> void: get_tree().quit())
-	quit_btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.09, 0.06), Color(0.3, 0.45, 0.3, 0.15)))
-	quit_btn.add_theme_stylebox_override("hover", _style(Color(0.04, 0.12, 0.08), Color(0.0, 1.0, 0.25, 0.35)))
-	quit_btn.add_theme_stylebox_override("pressed", _style(Color(0.03, 0.06, 0.04), Color(0.0, 1.0, 0.25, 0.5)))
 	center.add_child(quit_btn)
 
 func _rebuild_levels() -> void:
@@ -129,22 +131,18 @@ func _rebuild_levels() -> void:
 	var names := ["SECTOR 01 — THE TERMINAL", "SECTOR 02 — SERVER FARM", "SECTOR 03 — THE CORE"]
 	for i in range(GameManager.LEVELS.size()):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(440, 54)
+		btn.custom_minimum_size = Vector2(460, 60)
 		var unlocked := GameManager.is_level_unlocked(i)
 		if unlocked:
 			btn.text = "▶  " + names[i]
 			btn.pressed.connect(func() -> void:
 				get_tree().change_scene_to_file(GameManager.LEVELS[i]))
-			btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.12, 0.08), Color(0.0, 1.0, 0.25, 0.3)))
-			btn.add_theme_stylebox_override("hover", _style(Color(0.05, 0.16, 0.10), Color(0.2, 1.0, 0.35, 0.5)))
-			btn.add_theme_stylebox_override("pressed", _style(Color(0.03, 0.08, 0.05), Color(0.0, 1.0, 0.25, 0.7)))
-			btn.add_theme_color_override("font_color", Color(0.75, 1.0, 0.6))
+			btn.add_theme_color_override("font_color", Color(0.15, 0.2, 0.15))
 		else:
 			btn.text = "⛨  " + names[i] + "   —  solve previous sector"
 			btn.disabled = true
-			btn.add_theme_stylebox_override("normal", _style(Color(0.03, 0.06, 0.04), Color(0.2, 0.35, 0.25, 0.15)))
-			btn.add_theme_color_override("font_color", Color(0.25, 0.5, 0.3))
-		btn.add_theme_font_size_override("font_size", 18)
+			btn.add_theme_color_override("font_color", Color(0.4, 0.5, 0.4))
+		btn.add_theme_font_size_override("font_size", 20)
 		_levels_box.add_child(btn)
 
 func _style(color: Color, border: Color) -> StyleBoxFlat:

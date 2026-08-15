@@ -1,10 +1,9 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player_idle.svg" id="2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player_run1.svg" id="3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player_run2.svg" id="4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player_jump.svg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/char/idle.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/char/walk.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/char/walk2.png" id="4"]
 
 [sub_resource type="CircleShape2D" id="shape"]
 radius = 8.0
@@ -26,7 +25,7 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id="anim_run"]
-length = 0.3
+length = 0.28
 loop = true
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -35,7 +34,7 @@ tracks/0/path = NodePath("Sprite2D:texture")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15),
+"times": PackedFloat32Array(0, 0.14),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [ExtResource("3"), ExtResource("4")]
@@ -54,23 +53,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ExtResource("5")]
-}
-
-[sub_resource type="Animation" id="anim_dash"]
-length = 0.16
-loop = false
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:texture")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [ExtResource("5")]
+"values": [ExtResource("3")]
 }
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
@@ -78,7 +61,8 @@ script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2")
-scale = Vector2(0.75, 0.75)
+scale = Vector2(1.5, 1.5)
+texture_filter = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("shape")
@@ -89,7 +73,6 @@ root_node = NodePath("..")
 anims/run = SubResource("anim_run")
 anims/jump = SubResource("anim_jump")
 anims/idle = SubResource("anim_idle")
-anims/dash = SubResource("anim_dash")
 
 [node name="DashTrail" type="CPUParticles2D" parent="."]
 emitting = false

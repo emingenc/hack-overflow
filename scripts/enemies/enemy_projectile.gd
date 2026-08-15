@@ -8,9 +8,9 @@ var _lifetime: float = 3.0
 func _ready() -> void:
 	# Sprite
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/chip.svg")
-	spr.scale = Vector2(0.35, 0.35)
-	spr.modulate = Color(1.0, 0.22, 0.18)
+	spr.texture = preload("res://assets/obj/enemy2.png")
+	spr.scale = Vector2(0.4, 0.4)
+	spr.modulate = Color(1.0, 0.45, 0.35)
 	spr.name = "Sprite2D"
 	add_child(spr)
 

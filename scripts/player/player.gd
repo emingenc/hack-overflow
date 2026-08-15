@@ -150,7 +150,7 @@ func _start_dash() -> void:
 func _update_animation() -> void:
 	sprite.flip_h = facing < 0
 	if is_dashing:
-		anim.play("dash")
+		anim.play("jump")  # dash uses the stretched mid-air pose (no separate sprite)
 		return
 	if not is_on_floor():
 		anim.play("jump")

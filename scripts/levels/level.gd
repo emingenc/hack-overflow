@@ -179,6 +179,15 @@ func _build_from_map() -> void:
 				"E":
 					_spawn_exit(cell)
 
+	# Boundary walls: stop the player walking off the left/right map edges
+	# (the maps only tile the floor, so the sides are open voids).
+	var map_width := 0
+	for line in rows:
+		map_width = maxi(map_width, line.length())
+	for row_i in range(rows.size()):
+		tile_layer.set_cell(Vector2i(-1, row_i), 0, _wall_tile)
+		tile_layer.set_cell(Vector2i(map_width, row_i), 0, _wall_tile)
+
 func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2(TILE_SIZE, TILE_SIZE)
@@ -308,9 +317,10 @@ func _spawn_hazard(cell: Vector2i) -> void:
 	col.shape = shape
 	hazard.add_child(col)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/spike.svg")
+	spr.texture = preload("res://assets/obj/enemy.png")  # Kenney enemy sprite
 	spr.name = "Sprite2D"
 	spr.position = Vector2(0, 6)
+	spr.scale = Vector2(0.9, 0.9)
 	hazard.add_child(spr)
 	add_child(hazard)
 	hazard.body_entered.connect(func(body: Node2D) -> void:
@@ -322,8 +332,9 @@ func _spawn_drone(cell: Vector2i) -> void:
 	drone.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	drone.patrol_distance = TILE_SIZE * 2.0
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/drone.svg")
+	spr.texture = preload("res://assets/obj/enemy.png")  # Kenney flying enemy
 	spr.name = "Sprite2D"
+	spr.scale = Vector2(1.1, 1.1)
 	drone.add_child(spr)
 	drone.add_child(_make_collision_circle(10.0))
 	add_child(drone)
@@ -332,8 +343,9 @@ func _spawn_turret(cell: Vector2i) -> void:
 	var turret := FirewallTurret.new()
 	turret.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/turret.svg")
+	spr.texture = preload("res://assets/obj/enemy2.png")  # Kenney turret sprite
 	spr.name = "Sprite2D"
+	spr.scale = Vector2(1.1, 1.1)
 	turret.add_child(spr)
 	turret.add_child(_make_collision_circle(12.0))
 	add_child(turret)
@@ -342,8 +354,9 @@ func _spawn_chip(cell: Vector2i) -> void:
 	var chip := DataChip.new()
 	chip.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/chip.svg")
+	spr.texture = preload("res://assets/obj/chip.png")  # Kenney gem/pickup
 	spr.name = "Sprite2D"
+	spr.scale = Vector2(0.9, 0.9)
 	chip.add_child(spr)
 	chip.add_child(_make_collision_circle(9.0))
 	add_child(chip)
@@ -355,12 +368,13 @@ func _spawn_firewall(cell: Vector2i) -> void:
 	firewall.terminal_name = "FIREWALL_" + str(level_index + 1).pad_zeros(2)
 	firewall.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/sprites/terminal.svg")
+	spr.texture = preload("res://assets/obj/terminal.png")  # Kenney screen/terminal
 	spr.name = "Sprite2D"
+	spr.scale = Vector2(1.5, 1.5)
 	firewall.add_child(spr)
 	var prompt := Label.new()
 	prompt.text = "PRESS E TO HACK"
-	prompt.position = Vector2(-40, -22)
+	prompt.position = Vector2(-40, -34)
 	prompt.add_theme_font_size_override("font_size", 10)
 	prompt.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	prompt.name = "Prompt"
@@ -379,11 +393,11 @@ func _spawn_exit(cell: Vector2i) -> void:
 	shape.radius = 22.0
 	col.shape = shape
 	exit_portal.add_child(col)
-	# Distinct exit visual: pulsing green ring + inner core, not a terminal.
+	# Distinct exit visual: pulsing portal sprite + inner glow, not a terminal.
 	var ring := Sprite2D.new()
-	ring.texture = preload("res://assets/sprites/portal.svg")
-	ring.modulate = Color(0.4, 1.0, 0.6)
-	ring.scale = Vector2(0.9, 0.9)
+	ring.texture = preload("res://assets/obj/portal.png")  # Kenney portal item
+	ring.modulate = Color(0.5, 1.0, 0.7)
+	ring.scale = Vector2(1.4, 1.4)
 	ring.name = "Sprite2D"
 	exit_portal.add_child(ring)
 	var core := Sprite2D.new()
@@ -430,16 +444,22 @@ func _on_puzzle_started(_level_idx: int) -> void:
 			_puzzle_ui.puzzle_completed.connect(_on_puzzle_completed)
 		if not _puzzle_ui.puzzle_locked.is_connected(_on_puzzle_locked):
 			_puzzle_ui.puzzle_locked.connect(_on_puzzle_locked)
-		_puzzle_ui.show_puzzle(GameManager.get_puzzle_for_level(level_index), level_index)
+		# Use the puzzle the firewall already rolled (avoid double-roll / drift).
+		_puzzle_ui.show_puzzle(firewall.puzzle, level_index)
 
 func _on_puzzle_locked() -> void:
-	# Integrity exhausted → close the puzzle and respawn at the terminal checkpoint.
+	# Integrity exhausted → close the puzzle, reset the terminal, respawn.
 	if _puzzle_ui:
 		_puzzle_ui.hide()
 		get_tree().paused = false
+	if firewall:
+		firewall.reset_terminal()
 	_spawn_player_at(_respawn_point)
 
 func _on_puzzle_completed(success: bool) -> void:
+	# Reset the terminal so a failed attempt (EXIT or lockout) can be re-tried.
+	if firewall:
+		firewall.reset_terminal()
 	if success and exit_portal:
 		exit_portal.monitoring = true
 		exit_portal.get_child(1).modulate = Color(0.4, 1.0, 0.9)

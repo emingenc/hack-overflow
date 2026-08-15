@@ -32,11 +32,13 @@ var _order_placed: Array[int] = []  # index into shuffled_steps per slot, -1 = e
 var _steps_correct: int = 0
 var _steps_total: int = 0
 var _slot_buttons: Array[Button] = []
+var _pool_buttons: Array[Button] = []
 # Firewall integrity: wrong answer -30%, hint -15%; at 0 the terminal locks
 # (level_index 0 never locks — forgiving first sector).
 var _integrity: float = 1.0
 var _level_index: int = 0
 var _integrity_bar: ProgressBar
+var _assisted: bool = false  # true if solved via integrity-exhaustion reveal
 signal puzzle_locked
 
 func _ready() -> void:
@@ -57,10 +59,14 @@ func _build_ui() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 
-	# Centered panel
+	# Centered panel — sized responsively to the viewport so it never overflows
+	# on phones (landscape or portrait).
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.custom_minimum_size = Vector2(760, 560)
+	var vp := get_viewport().get_visible_rect().size
+	var pw := minf(760.0, vp.x * 0.92)
+	var ph := minf(560.0, vp.y * 0.90)
+	_panel.custom_minimum_size = Vector2(pw, ph)
 	_panel.add_theme_stylebox_override("panel", _make_panel_style())
 	add_child(_panel)
 
@@ -127,33 +133,34 @@ func _build_ui() -> void:
 	var hline := HSeparator.new()
 	vbox.add_child(hline)
 
-	# Problem description (scrollable)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, 180)
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	vbox.add_child(scroll)
-
+	# Problem description — a plain RichTextLabel. (A ScrollContainer wrapper
+	# collapses the label to zero size and hides the question entirely.)
 	_desc_label = RichTextLabel.new()
-	_desc_label.bbcode_enabled = true
-	_desc_label.fit_content = true
-	_desc_label.scroll_active = false
+	# BBCode OFF — DSA text is full of square brackets ([i], [start_i, end_i],
+	# [0,1], [lo,hi]) which BBCode would parse as tags and silently drop.
+	_desc_label.bbcode_enabled = false
+	_desc_label.scroll_active = true
+	_desc_label.custom_minimum_size = Vector2(0, 200)
+	_desc_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# CRITICAL: wrap the problem text or it clips past the panel edge on phones.
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_desc_label.add_theme_font_size_override("normal_font_size", 17)
+	_desc_label.add_theme_font_size_override("normal_font_size", 18)
 	_desc_label.add_theme_color_override("default_color", Color(0.85, 1.0, 0.7))
-	scroll.add_child(_desc_label)
+	vbox.add_child(_desc_label)
 
-	# Options
-	var options_label := Label.new()
-	options_label.text = "CHOOSE YOUR APPROACH:"
-	options_label.add_theme_font_size_override("font_size", 13)
-	options_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
-	vbox.add_child(options_label)
+	# Options — wrapped in a scroll area so tall ORDER layouts don't push the
+	# panel (and the submit/exit buttons) below the fold on short screens.
+	var options_scroll := ScrollContainer.new()
+	options_scroll.custom_minimum_size = Vector2(0, 180)
+	options_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	options_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(options_scroll)
 
 	_options_box = VBoxContainer.new()
 	_options_box.add_theme_constant_override("separation", 8)
-	vbox.add_child(_options_box)
+	_options_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	options_scroll.add_child(_options_box)
 
 	# Hint area
 	_hint_label = Label.new()
@@ -218,11 +225,16 @@ func _make_button_style(color: Color) -> StyleBoxFlat:
 	sb.content_margin_bottom = 10
 	return sb
 
+## Strip markdown backticks (code quotes) — meaningless in a plain text label.
+func _clean_text(s: String) -> String:
+	return s.replace("`", "")
+
 func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 	puzzle = data
 	_level_index = level_index
 	_integrity = 1.0
 	_integrity_bar.value = _integrity
+	_assisted = false
 	_selected = -1
 	_answered = false
 	_attempts = 0
@@ -239,7 +251,7 @@ func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 	_difficulty_label.add_theme_color_override("font_color",
 		Color(0.6, 1.0, 0.6) if puzzle.difficulty == "EASY" else Color(1.0, 0.8, 0.4))
 	_attempts_label.text = ""
-	_desc_label.text = puzzle.description
+	_desc_label.text = _clean_text(puzzle.description)
 	_feedback_label.text = ""
 	_feedback_label.add_theme_color_override("font_color", Color(0.85, 1.0, 0.7))
 	_hint_label.text = ""
@@ -276,9 +288,8 @@ func _make_option_button(text: String, i: int) -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 56)
 	btn.add_theme_font_size_override("font_size", 18)
-	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.16, 0.09)))
-	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.08, 0.2, 0.1)))
-	btn.add_theme_stylebox_override("pressed", _make_button_style(Color(0.05, 0.14, 0.08)))
+	# No per-button style overrides — inherit the global theme's Kenney 9-slice
+	# buttons for a consistent professional look.
 	return btn
 
 ## ── TRACE: dry-run a sequence of steps ───────────────────────────────
@@ -288,7 +299,7 @@ func _build_trace_step() -> void:
 		# All steps done → optional synthesis capstone question.
 		var syn: Dictionary = puzzle.get("synthesis", {})
 		if not syn.is_empty():
-			_desc_label.text = syn.get("question", "")
+			_desc_label.text = _clean_text(syn.get("question", ""))
 			_submit_button.text = "SUBMIT ANSWER"
 			for i in range(syn.get("options", []).size()):
 				var btn := _make_option_button(syn["options"][i], i)
@@ -297,8 +308,9 @@ func _build_trace_step() -> void:
 			_submit_button.disabled = true
 		return
 	var step: Dictionary = steps[_step_index]
-	# State readout + question
-	_desc_label.text = "STATE: " + step.get("state", "") + "\n\n" + step.get("question", "")
+	# State readout + question — KEEP the original problem/input visible so the
+	# learner can reason about the dry-run without holding it all in memory.
+	_desc_label.text = _clean_text(puzzle.description) + "\n\nSTATE: " + step.get("state", "") + "\n\n" + _clean_text(step.get("question", ""))
 	_attempts_label.text = "STEP %d / %d" % [_step_index + 1, steps.size()]
 	_submit_button.text = "SUBMIT"
 	for i in range(step.get("options", []).size()):
@@ -313,34 +325,27 @@ func _build_order() -> void:
 	_order_placed.clear()
 	for _i in range(correct.size()):
 		_order_placed.append(-1)
-	# Two columns: a pool of shuffled steps (left) + numbered slots (right).
-	var cols := HBoxContainer.new()
-	cols.add_theme_constant_override("separation", 16)
-	_options_box.add_child(cols)
-
-	var pool := VBoxContainer.new()
-	pool.add_theme_constant_override("separation", 6)
-	pool.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cols.add_child(pool)
+	# Single column: SCRAMBLED pool on top, numbered slots below.
 	var pool_label := Label.new()
-	pool_label.text = "SCRAMBLED:"
+	pool_label.text = "TAP A SCRAMBLED STEP TO PLACE IT IN THE NEXT SLOT:"
 	pool_label.add_theme_font_size_override("font_size", 14)
 	pool_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
-	pool.add_child(pool_label)
+	pool_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_options_box.add_child(pool_label)
+
+	_pool_buttons = []
 	for i in range(shuffled.size()):
 		var btn := _make_order_step_button(shuffled[i])
 		btn.pressed.connect(_on_order_pool_pressed.bind(i))
-		pool.add_child(btn)
+		_options_box.add_child(btn)
+		_pool_buttons.append(btn)
 
-	var slots := VBoxContainer.new()
-	slots.add_theme_constant_override("separation", 6)
-	slots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cols.add_child(slots)
 	var slot_label := Label.new()
 	slot_label.text = "SEQUENCE:"
 	slot_label.add_theme_font_size_override("font_size", 14)
 	slot_label.add_theme_color_override("font_color", Color(0.5, 0.85, 0.5))
-	slots.add_child(slot_label)
+	_options_box.add_child(slot_label)
+
 	_slot_buttons = []
 	for s in range(correct.size()):
 		var btn := Button.new()
@@ -348,10 +353,10 @@ func _build_order() -> void:
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.custom_minimum_size = Vector2(0, 52)
 		btn.add_theme_font_size_override("font_size", 16)
-		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.04, 0.1, 0.06)))
-		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.06, 0.16, 0.09)))
+		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.08, 0.1, 0.2)))
+		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.12, 0.16, 0.3)))
 		btn.pressed.connect(_on_order_slot_pressed.bind(s))
-		slots.add_child(btn)
+		_options_box.add_child(btn)
 		_slot_buttons.append(btn)
 	_submit_button.text = "CHECK SEQUENCE"
 
@@ -361,16 +366,20 @@ func _make_order_step_button(text: String) -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 52)
 	btn.add_theme_font_size_override("font_size", 15)
-	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.16, 0.09)))
-	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.08, 0.2, 0.1)))
+	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
+	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.16, 0.22, 0.45)))
 	return btn
 
 func _on_order_pool_pressed(step_idx: int) -> void:
+	# Prevent duplicate placement: a step already placed can't be re-placed.
+	if _order_placed.has(step_idx):
+		return
 	# Place this step into the first empty slot.
 	for s in range(_order_placed.size()):
 		if _order_placed[s] == -1:
 			_order_placed[s] = step_idx
 			_refresh_order_slots()
+			_refresh_order_pool()
 			_submit_button.disabled = false
 			return
 
@@ -378,6 +387,14 @@ func _on_order_slot_pressed(slot: int) -> void:
 	if _order_placed[slot] != -1:
 		_order_placed[slot] = -1  # pull back out
 		_refresh_order_slots()
+		_refresh_order_pool()
+
+func _refresh_order_pool() -> void:
+	# Dim (disable) pool steps that are already placed.
+	for i in range(_pool_buttons.size()):
+		var placed: bool = _order_placed.has(i)
+		_pool_buttons[i].disabled = placed
+		_pool_buttons[i].modulate = Color(0.5, 0.5, 0.5) if placed else Color(1, 1, 1)
 
 func _refresh_order_slots() -> void:
 	var shuffled: Array = puzzle.get("shuffled_steps", [])
@@ -385,10 +402,10 @@ func _refresh_order_slots() -> void:
 		var idx: int = _order_placed[s]
 		if idx == -1:
 			_slot_buttons[s].text = "%d.  [ empty ]" % (s + 1)
-			_slot_buttons[s].add_theme_color_override("font_color", Color(0.55, 0.8, 0.55))
+			_slot_buttons[s].add_theme_color_override("font_color", Color(0.6, 0.65, 0.75))
 		else:
 			_slot_buttons[s].text = "%d.  %s" % [s + 1, shuffled[idx]]
-			_slot_buttons[s].add_theme_color_override("font_color", Color(0.85, 1.0, 0.7))
+			_slot_buttons[s].add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
 
 func _on_option_pressed(index: int) -> void:
 	if _answered:
@@ -478,6 +495,7 @@ func _on_submit_trace() -> void:
 			_feedback_label.text = "✗ " + syn.get("explanation", "")
 			_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 			AudioManager.play("wrong")
+			_drain_integrity(0.30)
 		_submit_button.disabled = true
 		_hint_button.disabled = true
 		_back_button.text = "CONTINUE →"
@@ -568,12 +586,14 @@ func _on_submit_order() -> void:
 		_answered = false
 		_submit_button.disabled = false
 
-## Drain firewall integrity. Returns true if the terminal locked (integrity 0).
+## Drain firewall integrity. At 0, convert the failure into a teaching moment:
+## reveal the worked answer, mark the task "solved with assistance" (reduced
+## reward), and let the player continue — never a dead-end softlock.
 func _drain_integrity(amount: float) -> bool:
 	_integrity = maxf(0.0, _integrity - amount)
 	_integrity_bar.value = _integrity
 	# Color shift as it drains: cyan → amber → red.
-	var c := Color(0.2, 1.0, 0.4)
+	var c := Color(0.2, 0.9, 1.0)
 	if _integrity < 0.5:
 		c = Color(1.0, 0.6, 0.2)
 	if _integrity <= 0.0:
@@ -581,12 +601,33 @@ func _drain_integrity(amount: float) -> bool:
 	var fill := _integrity_bar.get_theme_stylebox("fill") as StyleBoxFlat
 	if fill:
 		fill.bg_color = c
-	if _integrity <= 0.0 and _level_index > 0:
-		_lock_terminal()
+	if _integrity <= 0.0:
+		_reveal_assisted()
 		return true
 	return false
 
+## Teaching moment instead of a softlock: reveal the correct answer + worked
+## explanation, mark assisted (reduced reward), emit completion as success.
+func _reveal_assisted() -> void:
+	_assisted = true
+	_last_correct = true
+	# Build a worked explanation: prefer a top-level explanation; for trace
+	# tasks, show the current step's explanation (the moment they got stuck).
+	var expl: String = str(puzzle.get("explanation", ""))
+	if expl == "":
+		var steps: Array = puzzle.get("steps", [])
+		if _step_index < steps.size():
+			expl = str(steps[_step_index].get("explanation", "Review the step and try again."))
+	_feedback_label.text = "⚠ FIREWALL BREACHED — integrity exhausted.\n\n" + expl + "\n\n[solved with assistance — reduced reward]"
+	_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	_submit_button.disabled = true
+	_hint_button.disabled = true
+	_back_button.text = "CONTINUE →"
+	_back_button.disabled = false
+	AudioManager.play("wrong")
+
 func _lock_terminal() -> void:
+	# Legacy path — kept for safety; new behavior is _reveal_assisted (no softlock).
 	_feedback_label.text = "⚠ FIREWALL LOCKED — integrity exhausted.\nRe-approach the terminal and try again."
 	_feedback_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 	_submit_button.disabled = true
@@ -595,6 +636,9 @@ func _lock_terminal() -> void:
 	puzzle_locked.emit()
 
 func _on_hint() -> void:
+	# Ignore hint taps during the brief correct-answer flash (answer in flight).
+	if _answered:
+		return
 	# Hints cost integrity — showing the nudge drains the firewall.
 	if not _show_hint:
 		_drain_integrity(0.15)

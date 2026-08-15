@@ -56,3 +56,9 @@ func _open_puzzle() -> void:
 	puzzle = GameManager.get_puzzle_for_level(level_index)
 	puzzle_started.emit(level_index)
 	# The level scene listens and opens the puzzle UI (keeps this class decoupled).
+
+## Reset after the puzzle closes so the terminal can be re-approached.
+## Without this, EXIT or a lockout would permanently brick the level gate.
+func reset_terminal() -> void:
+	_puzzle_open = false
+	prompt.show()

@@ -253,7 +253,7 @@ const PUZZLES: Array[Dictionary] = [
 		"steps": [
 			{ "state": "ch='(' · stack = []", "question": "What happens on '('?", "options": ["Pop the stack", "Push '(' onto the stack", "Return False", "Skip it"], "correct_index": 1, "explanation": "'(' is an opening bracket → push it. stack = ['(']." },
 			{ "state": "ch=')' · stack = ['(']", "question": "What happens on ')'?", "options": ["Push ')'", "Pop '(' — it matches → continue", "Return False — mismatch", "Return True"], "correct_index": 1, "explanation": "')' is closing → pop the top '('; it matches the expected pair → continue. stack = []." },
-			{ "state": "ch=']' · stack = []", "question": "What happens on ']'?", "options": ["Pop and match — but stack is empty → return False", "Push ']'", "Return True", "Skip it"], "correct_index": 0, "explanation": "Wait — in the actual input ']' comes after '[' which pushes, so stack=['['] and ']' matches. (This step tests: closing brackets need a matching opener on top.)" },
+			{ "state": "ch='[' · stack = []", "question": "What happens on '['?", "options": ["Pop the stack", "Push '[' onto the stack", "Return False", "Return True"], "correct_index": 1, "explanation": "'[' is an opening bracket → push it. stack = ['[']." },
 		],
 		"hint": "A closing bracket must match the TOP of the stack.",
 	},

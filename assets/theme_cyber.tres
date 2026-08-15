@@ -1,115 +1,87 @@
-[gd_resource type="Theme" format=3 uid="uid://dhptsnnfdii00"]
+[gd_resource type="Theme" load_steps=11 format=3]
 
-[ext_resource type="FontFile" uid="uid://bx5l84mgp83q6" path="res://assets/fonts/VT323-Regular.ttf" id="1"]
+[ext_resource type="FontFile" path="res://assets/fonts/VT323-Regular.ttf" id="1"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_green.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_blue.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_grey.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_red.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/ui/input.png" id="7"]
 
-[sub_resource type="StyleBoxFlat" id="btn_disabled"]
+[sub_resource type="StyleBoxTexture" id="sb_normal"]
+texture = ExtResource("3")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.03, 0.08, 0.05, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.15, 0.35, 0.2, 0.2)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="btn_focus"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0, 1.0, 0.25, 0.5)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="btn_hover"]
+[sub_resource type="StyleBoxTexture" id="sb_hover"]
+texture = ExtResource("4")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.04, 0.12, 0.08, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.2, 1.0, 0.35, 0.6)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+modulate_color = Color(1.15, 1.15, 1.15, 1.0)
 
-[sub_resource type="StyleBoxFlat" id="btn_normal"]
+[sub_resource type="StyleBoxTexture" id="sb_pressed"]
+texture = ExtResource("5")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="sb_disabled"]
+texture = ExtResource("5")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.03, 0.09, 0.06, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0, 1.0, 0.3, 0.4)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+modulate_color = Color(0.5, 0.5, 0.5, 0.7)
 
-[sub_resource type="StyleBoxFlat" id="btn_pressed"]
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
-bg_color = Color(0.03, 0.08, 0.05, 1)
+[sub_resource type="StyleBoxFlat" id="sb_panel"]
+bg_color = Color(0.05, 0.07, 0.12, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.0, 1.0, 0.25, 0.8)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="panel"]
-content_margin_left = 20.0
-content_margin_top = 16.0
-content_margin_right = 20.0
-content_margin_bottom = 16.0
-bg_color = Color(0.03, 0.06, 0.04, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0, 1, 0.25, 0.35)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+border_color = Color(0.0, 0.9, 0.5, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.0, 0.8, 0.4, 0.3)
+shadow_size = 16
 
 [resource]
 default_font = ExtResource("1")
-default_font_size = 18
-Button/colors/font_color = Color(0.8, 1, 0.65, 1)
-Button/colors/font_disabled_color = Color(0.3, 0.5, 0.35, 1)
-Button/colors/font_hover_color = Color(1, 1, 1, 1)
-Button/colors/font_pressed_color = Color(0.5, 1, 0.5, 1)
-Button/font_sizes/font_size = 20
-Button/fonts/font = ExtResource("1")
-Button/styles/disabled = SubResource("btn_disabled")
-Button/styles/focus = SubResource("btn_focus")
-Button/styles/hover = SubResource("btn_hover")
-Button/styles/normal = SubResource("btn_normal")
-Button/styles/pressed = SubResource("btn_pressed")
-Label/colors/font_color = Color(0.7, 1, 0.6, 1)
-Label/font_sizes/font_size = 18
-Label/fonts/font = ExtResource("1")
-Panel/styles/panel = SubResource("panel")
-PanelContainer/styles/panel = SubResource("panel")
+default_font_size = 20
+Button/colors/font_color = Color(0.1, 0.12, 0.1, 1)
+Button/colors/font_hover_color = Color(0.05, 0.08, 0.05, 1)
+Button/colors/font_pressed_color = Color(0.9, 0.95, 0.9, 1)
+Button/colors/font_disabled_color = Color(0.5, 0.55, 0.5, 0.6)
+Button/styles/normal = SubResource("sb_normal")
+Button/styles/hover = SubResource("sb_hover")
+Button/styles/pressed = SubResource("sb_pressed")
+Button/styles/disabled = SubResource("sb_disabled")
+Button/constants/outline_size = 0
+Label/colors/font_color = Color(0.9, 0.95, 1.0, 1)
+Label/colors/font_shadow_color = Color(0, 0, 0, 0.6)
+Label/constants/shadow_offset_x = 1
+Label/constants/shadow_offset_y = 2
+PanelContainer/styles/panel = SubResource("sb_panel")

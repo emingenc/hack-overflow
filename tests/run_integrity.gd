@@ -45,7 +45,7 @@ func _run() -> void:
 	ui.show_puzzle(trace, 1)
 	_check(ui._integrity == 1.0, "integrity starts full")
 
-	# Answer the first step wrong 4 times → 4 × 0.30 = 1.20 → locks.
+	# Answer the first step wrong 4 times → 4 × 0.30 = 1.20 → reveal.
 	for n in range(4):
 		var step: Dictionary = trace["steps"][ui._step_index]
 		var wrong: int = 0
@@ -56,23 +56,11 @@ func _run() -> void:
 		ui._on_submit()
 		await get_tree().create_timer(0.2, true).timeout
 
-	_check(_locked, "terminal locks after integrity hits 0")
 	_check(ui._integrity <= 0.0, "integrity drained to 0 (got %.2f)" % ui._integrity)
-
-	# Tutorial level never locks even at 0.
-	_locked = false
-	ui.show_puzzle(trace, 0)
-	for n in range(5):
-		var step: Dictionary = trace["steps"][ui._step_index]
-		var wrong: int = 0
-		if int(step["correct_index"]) == 0:
-			wrong = 1
-		ui._on_option_pressed(wrong)
-		await get_tree().create_timer(0.1, true).timeout
-		ui._on_submit()
-		await get_tree().create_timer(0.2, true).timeout
-	_check(not _locked, "tutorial level (0) never locks")
-	_check(ui._integrity <= 0.0, "tutorial integrity still drains to 0")
+	_check(ui._assisted, "integrity exhaustion marks assisted")
+	_check(ui._last_correct, "assisted reveal lets the player continue (not softlock)")
+	_check(not _locked, "no dead-end lockout — teaching moment instead")
+	_check(ui._back_button.text == "CONTINUE →", "assisted path offers CONTINUE")
 
 	# Hint drains integrity.
 	var ui2 := PuzzleUI.new()
