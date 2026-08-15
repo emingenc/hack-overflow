@@ -55,10 +55,10 @@ func _spawn_ambient_particles() -> void:
 	var p := GPUParticles2D.new()
 	p.amount = 48
 	p.lifetime = 3.0
-	p.position = Vector2(_map_pixel_width() * 0.5, _map_pixel_height() + 40)
+	p.position = Vector2(_map_pixel_width() * 0.5, _map_pixel_height() * 0.5)
 	var mat := ParticleProcessMaterial.new()
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	mat.emission_box_extents = Vector3(_map_pixel_width() * 0.5, 6.0, 1.0)
+	mat.emission_box_extents = Vector3(_map_pixel_width() * 0.5, _map_pixel_height() * 0.5, 1.0)
 	mat.direction = Vector3(0, -1, 0)
 	mat.spread = 20.0
 	mat.initial_velocity_min = 40.0

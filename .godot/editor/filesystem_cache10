@@ -73,8 +73,8 @@ level_01_terminal.tscn::PackedScene::-1::1786665878::0::1::::<><><>0<>0<><>::res
 level_02_servers.tscn::PackedScene::-1::1786665878::0::1::::<><><>0<>0<><>::res://scripts/levels/level.gd
 level_03_core.tscn::PackedScene::-1::1786665878::0::1::::<><><>0<>0<><>::res://scripts/levels/level.gd
 ::res://scripts/::1786665878
-::res://scripts/autoload/::1786765824
-audio_manager.gd::GDScript::413547071306987356::1786665878::0::1::::<>Node<><>0<>0<><>::
+::res://scripts/autoload/::1786767379
+audio_manager.gd::GDScript::413547071306987356::1786767379::0::1::::<>Node<><>0<>0<><>::
 game_manager.gd::GDScript::7633307080923009602::1786756663::0::1::::<>Node<><>0<>0<><>::
 hitstop.gd::GDScript::3574978927055129415::1786765821::0::1::::<>Node<><>0<>0<><>::
 settings.gd::GDScript::1944470411134873491::1786765819::0::1::::<>Node<><>0<>0<><>::
@@ -85,10 +85,10 @@ puzzle_ui.gd::GDScript::3632958478789747676::1786767260::0::1::::PuzzleUI<>Contr
 enemy_projectile.gd::GDScript::682119481240255319::1786665878::0::1::::EnemyProjectile<>Area2D<><>0<>0<><>::
 firewall_turret.gd::GDScript::1874374731404870882::1786665878::0::1::::FirewallTurret<>Area2D<><>0<>0<><>::
 patrol_drone.gd::GDScript::161103629607341137::1786665878::0::1::::PatrolDrone<>Area2D<><>0<>0<><>::
-::res://scripts/levels/::1786766851
+::res://scripts/levels/::1786767410
 camera_shake.gd::GDScript::5078674411080445744::1786765938::0::1::::<>Node<><>0<>0<><>::
 data_chip.gd::GDScript::261401882390864420::1786665878::0::1::::DataChip<>Area2D<><>0<>0<><>::
-level.gd::GDScript::6175578180534224439::1786766851::0::1::::Level<>Node2D<><>0<>0<><>::
+level.gd::GDScript::6175578180534224439::1786767410::0::1::::Level<>Node2D<><>0<>0<><>::
 matrix_rain.gd::GDScript::6424780566786326873::1786766492::0::1::::<>CanvasLayer<><>0<>0<><>::
 ::res://scripts/player/::1786766042
 player.gd::GDScript::1178108795597343854::1786767260::0::1::::Player<>CharacterBody2D<><>0<>0<><>::
