@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="68" viewBox="0 0 48 68"><path d="M24 22 L24 42 Q24 50 18 56 L30 56 Q24 50 24 42 Z" fill="#4f50ab" stroke="#04150a" stroke-width="1"/><circle cx="24" cy="15" r="10" fill="#04150a"/><circle cx="24" cy="15" r="10" fill="none" stroke="#4f50ab" stroke-width="2"/><rect x="17" y="12" width="5" height="3" rx="1.5" fill="#00ff41"/><rect x="26" y="12" width="5" height="3" rx="1.5" fill="#00ff41"/><path d="M14 14 Q14 4 24 3 Q34 4 34 14" fill="none" stroke="#00ff41" stroke-width="1.5"/><rect x="18" y="51" width="5" height="10" fill="#04150a"/><rect x="25" y="56" width="5" height="10" fill="#04150a"/><rect x="17" y="59" width="7" height="3" fill="#00ff41"/><rect x="24" y="64" width="7" height="3" fill="#00ff41"/><rect x="10" y="24" width="4" height="14" fill="#04150a"/><rect x="34" y="24" width="4" height="14" fill="#04150a"/><circle cx="24" cy="34" r="3" fill="#3dff8c"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="68" viewBox="0 0 48 68">
+  <!-- hood -->
+  <path d="M13 24 Q13 5 24 5 Q35 5 35 24 L35 27 Q35 32 30 34 L18 34 Q13 32 13 27 Z" fill="#4f50ab"/>
+  <path d="M15 20 Q15 7 24 7 Q33 7 33 20 Q30 12 24 12 Q18 12 15 20 Z" fill="#6a6ac4"/>
+  <path d="M13 27 Q13 32 18 34 L16 34 Q12 31 12 26 Z" fill="#34346e"/>
+  <path d="M13 24 Q13 5 24 5 Q35 5 35 24" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+  <!-- face + visor -->
+  <path d="M16 24 Q16 14 24 14 Q32 14 32 24 Q32 28 27 29 L21 29 Q16 28 16 24 Z" fill="#04150a"/>
+  <rect x="15" y="21" width="18" height="6" rx="3" fill="#00ff41" opacity="0.22"/>
+  <rect x="18" y="22" width="12" height="4" rx="2" fill="#00ff41"/>
+  <rect x="19" y="22.5" width="10" height="1.5" rx="0.75" fill="#b8ffd0"/>
+  <!-- coat -->
+  <path d="M16 34 L16 55 Q16 60 24 60 Q32 60 32 55 L32 34 Z" fill="#2e2e5c"/>
+  <path d="M20 34 L20 55 Q20 58 24 58 Q28 58 28 55 L28 34 Z" fill="#23234a"/>
+  <path d="M16 34 L16 42 Q16 46 20 49 L20 34 Z" fill="#3c3c72"/>
+  <path d="M24 34 L24 60" stroke="#1c1c40" stroke-width="1.5"/>
+  <!-- chest core -->
+  <circle cx="24" cy="42" r="4.5" fill="none" stroke="#00ff41" stroke-width="1" opacity="0.5"/>
+  <circle cx="24" cy="42" r="2.5" fill="#00ff41"/>
+  <circle cx="24" cy="42" r="1.2" fill="#b8ffd0"/>
+  <!-- arms (swing: front arm raised, back arm forward) -->
+  <path d="M33 38 Q40 34 38 30 L35 32 L33 48 Q33 52 31 54 L35 54 Q38 50 38 44 Z" fill="#2e2e5c"/>
+  <rect x="36" y="30" width="5" height="5" rx="2.5" fill="#04150a"/>
+  <path d="M11 38 Q8 40 6 44 L8 46 L10 48 L10 54 L13 54 Q13 46 13 38 Z" fill="#2e2e5c"/>
+  <rect x="6" y="44" width="5" height="4" rx="2" fill="#04150a"/>
+  <rect x="36" y="30" width="5" height="2" fill="#00ff41"/>
+  <rect x="7" y="44" width="4" height="2" fill="#00ff41"/>
+  <!-- belt -->
+  <rect x="16" y="54" width="16" height="3" rx="1" fill="#04150a"/>
+  <rect x="22" y="54" width="4" height="3" rx="1" fill="#00ff41"/>
+  <!-- legs (stride: right forward, left back) -->
+  <path d="M25 59 L29 66 L34 66 L32 60 Z" fill="#1c1c40"/>
+  <path d="M18 59 L14 65 L9 63 L13 58 Z" fill="#1c1c40"/>
+  <rect x="27" y="65" width="9" height="3" rx="1.5" fill="#00ff41"/>
+  <rect x="7" y="62" width="9" height="3" rx="1.5" fill="#00ff41"/>
+</svg>
