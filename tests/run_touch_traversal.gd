@@ -47,15 +47,47 @@ func _run() -> void:
 	_check(ui != null and ui.visible, "puzzle UI opens via touch action_press")
 	if ui and ui.visible:
 		_check(get_tree().paused, "game pauses while puzzle open")
-		var correct_idx: int = ui.puzzle.correct_index
-		ui._on_option_pressed(correct_idx)
+		await _solve_task(ui)
+		_check(ui._last_correct, "task solved (touch)")
+		ui._on_back()  # CONTINUE → puzzle_completed(true)
 		await get_tree().create_timer(0.2).timeout
-		ui._on_submit()
-		await get_tree().create_timer(2.2).timeout
-		_check(exit_portal.monitoring, "exit unlocked after correct answer (touch)")
+		_check(exit_portal.monitoring, "exit unlocked after CONTINUE (touch)")
 		_check(not get_tree().paused, "game unpaused after puzzle")
 
 	_finish()
+
+## Solve any puzzle task type via the real UI methods.
+func _solve_task(ui: PuzzleUI) -> void:
+	match ui._task_type:
+		"trace":
+			var steps: Array = ui.puzzle.get("steps", [])
+			for step_idx in range(steps.size()):
+				var ci: int = int(steps[step_idx]["correct_index"])
+				ui._on_option_pressed(ci)
+				await get_tree().create_timer(0.1, true).timeout
+				ui._on_submit()
+				await get_tree().create_timer(1.0, true).timeout
+			if ui.puzzle.has("synthesis"):
+				var syn: Dictionary = ui.puzzle["synthesis"]
+				var sci: int = int(syn["correct_index"])
+				ui._on_option_pressed(sci)
+				await get_tree().create_timer(0.1, true).timeout
+				ui._on_submit()
+				await get_tree().create_timer(0.2, true).timeout
+		"order":
+			var correct_order: Array = ui.puzzle["correct_order"]
+			for slot in range(correct_order.size()):
+				var step_idx: int = int(correct_order[slot])
+				ui._on_order_pool_pressed(step_idx)
+			await get_tree().create_timer(0.1, true).timeout
+			ui._on_submit()
+			await get_tree().create_timer(0.2, true).timeout
+		_:
+			var correct_idx: int = ui.puzzle.correct_index
+			ui._on_option_pressed(correct_idx)
+			await get_tree().create_timer(0.2, true).timeout
+			ui._on_submit()
+			await get_tree().create_timer(0.3, true).timeout
 
 func _finish() -> void:
 	if _failures.is_empty():

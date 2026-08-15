@@ -37,6 +37,7 @@ var dash_dir: Vector2 = Vector2.RIGHT
 var is_dashing: bool = false
 var facing: int = 1  # 1 = right, -1 = left
 var gravity: float = 1500.0
+var fall_speed_at_impact: float = 0.0
 
 func _ready() -> void:
 	dust_timer.timeout.connect(func() -> void: _spawn_dust())
@@ -101,6 +102,7 @@ func _physics_process(delta: float) -> void:
 		jumps_remaining = 1  # consumed ground jump
 		_spawn_dust()
 		AudioManager.play("jump")
+		_squash(Vector2(0.6, 1.4), 0.08)
 	# Double jump (air)
 	elif jump_buffer_timer > 0.0 and jumps_remaining > 0 and not is_on_floor():
 		velocity.y = JUMP_VELOCITY * 0.95
@@ -116,13 +118,19 @@ func _physics_process(delta: float) -> void:
 	# ── Animation ─────────────────────────────────────────────────
 	_update_animation()
 
+	fall_speed_at_impact = velocity.y
 	move_and_slide()
 
 	# Landing: dust + refill dash (air dash only consumes one).
-	if is_on_floor() and not was_on_floor and velocity.y >= 0.0:
+	if is_on_floor() and not was_on_floor and fall_speed_at_impact >= 0.0:
 		_spawn_dust()
 		AudioManager.play("land", -8.0)
 		can_dash = true
+		var impact := clampf(fall_speed_at_impact / MAX_FALL_SPEED, 0.0, 1.0)
+		_squash(Vector2(1.0 + 0.5 * impact, 1.0 - 0.4 * impact), 0.07)
+		if impact > 0.6:
+			_add_trauma(0.15 * impact)
+			Hitstop.freeze(0.02)
 	was_on_floor = is_on_floor()
 
 func _start_dash() -> void:
@@ -132,6 +140,9 @@ func _start_dash() -> void:
 	dash_cooldown_timer = DASH_COOLDOWN
 	dash_trail.emitting = true
 	AudioManager.play("dash")
+	Hitstop.freeze(0.04)
+	_add_trauma(0.2)
+	_squash(Vector2(1.3, 0.7), 0.12)
 	# Refill happens on landing (see _physics_process).
 
 func _update_animation() -> void:
@@ -144,7 +155,7 @@ func _update_animation() -> void:
 		anim.play("run")
 	else:
 		anim.play("idle")
-	sprite.scale.x = facing
+	sprite.flip_h = facing < 0
 
 func _spawn_dust() -> void:
 	# Simple dust puff via CPUParticles2D at feet
@@ -166,7 +177,24 @@ func _spawn_dust() -> void:
 	p.finished.connect(p.queue_free)
 	add_child(p)
 
+## Squash-and-stretch: fast ease-out scale, then settle (2026 norm — no slow wobble).
+## Direction handled by `flip_h`, so scale is always positive here.
+func _squash(scale: Vector2, duration: float) -> void:
+	if Settings.reduced_motion:
+		return
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(sprite, "scale", Vector2.ONE, duration * 2.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+## Route screen-shake to the owning level (the player's parent).
+func _add_trauma(amount: float) -> void:
+	var lvl := get_parent() as Level
+	if lvl:
+		lvl.add_trauma(amount)
+
 func die() -> void:
 	AudioManager.play("death")
+	Hitstop.freeze(0.08)
+	_add_trauma(0.5)
 	died.emit()
 	queue_free()

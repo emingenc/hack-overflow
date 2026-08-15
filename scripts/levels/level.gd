@@ -30,15 +30,24 @@ var _hud: Control = null
 var _level_time: float = 0.0
 var _level_active: bool = false
 var _completed: bool = false
+var _cam: Camera2D = null
+var _shake: Node = null
 
 func _ready() -> void:
 	GameManager.chips_total[level_index] = 0
+	_spawn_matrix_rain()
 	_build_parallax()
 	_build_from_map()
 	_spawn_hud()
 	_spawn_puzzle_ui()
 	_spawn_crt_overlay()
 	_level_active = true
+
+## Matrix digital rain on its own deep canvas layer (behind the world).
+func _spawn_matrix_rain() -> void:
+	var rain := preload("res://scripts/levels/matrix_rain.gd").new()
+	rain.name = "MatrixRainLayer"
+	add_child(rain)
 
 ## CRT scanline + vignette overlay on its own canvas layer (always on top).
 func _spawn_crt_overlay() -> void:
@@ -56,15 +65,15 @@ func _spawn_crt_overlay() -> void:
 	crt.name = "CRTOverlay"
 	layer.add_child(crt)
 
-## Two-layer parallax: far skyline + mid grid. Follows the camera slowly.
+## Two-layer parallax: far city skyline + mid grid. Follows the camera slowly.
 func _build_parallax() -> void:
 	var sky := TextureRect.new()
-	sky.texture = preload("res://assets/sprites/skyline.svg")
+	sky.texture = preload("res://assets/sprites/city_bg.svg")
 	sky.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	sky.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	sky.set_anchors_preset(Control.PRESET_FULL_RECT)
 	sky.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	sky.modulate = Color(0.9, 0.95, 1.0, 0.7)
+	sky.modulate = Color(0.35, 0.5, 0.4, 0.55)  # dim green cast so the rain reads through
 	sky.name = "ParallaxSky"
 	add_child(sky)
 
@@ -74,7 +83,7 @@ func _build_parallax() -> void:
 	grid.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	grid.set_anchors_preset(Control.PRESET_FULL_RECT)
 	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	grid.modulate = Color(0.6, 0.75, 1.0, 0.35)
+	grid.modulate = Color(0.25, 0.55, 0.35, 0.22)
 	grid.name = "ParallaxGrid"
 	add_child(grid)
 
@@ -82,6 +91,7 @@ func _process(delta: float) -> void:
 	if _level_active and not _completed:
 		_level_time += delta
 	_update_parallax()
+	_update_camera()
 
 ## Scrolls the two background layers relative to the player so they feel deep.
 func _update_parallax() -> void:
@@ -106,9 +116,6 @@ func _build_from_map() -> void:
 	add_child(tile_layer)
 	var tileset := _make_tileset()
 	tile_layer.tile_set = tileset
-	# Tint the pixel tiles toward cyan to keep the cyberpunk palette.
-	# Note: the blue channel (1.25) intentionally clips bright pixels for the neon look.
-	tile_layer.modulate = Color(0.75, 0.95, 1.25)
 
 	for row_i in range(rows.size()):
 		var line := rows[row_i]
@@ -119,7 +126,7 @@ func _build_from_map() -> void:
 				"#":
 					tile_layer.set_cell(cell, 0, _wall_tile)
 				"=":
-					tile_layer.set_cell(cell, 0, _plat_tile)
+					tile_layer.set_cell(cell, 1, _plat_tile)
 				"^":
 					_spawn_hazard(cell)
 				"D":
@@ -139,43 +146,46 @@ func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2(TILE_SIZE, TILE_SIZE)
 
-	# Single atlas source from the Kenney pixel pack (20 cols x 9 rows, 18px tiles).
-	# NOTE: tilemap_packed.png is 360x162 = 20x9 tiles @18px with ZERO gaps between
-	# tiles — separation must stay 0 or every sampled region drifts into neighbors.
+	# Custom cyberpunk tiles: dark metal with neon edges (matches palette,
+	# no fake tint needed). Two tile textures, one atlas source.
 	var src := TileSetAtlasSource.new()
-	src.texture = preload("res://assets/kenney/tilemap_packed.png")
-	src.texture_region_size = Vector2i(18, 18)
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load("res://assets/sprites/tile_wall.svg")
+	atlas.region = Rect2(0, 0, 36, 36)
+	src.texture = atlas
+	src.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
 	src.separation = Vector2i.ZERO
 	ts.add_source(src, 0)
 
-	# Kenney atlas indices (from the pack's Tiled example maps):
-	#   150 = earth-brown ground block, 50 = platform middle.
-	# Index -> (col, row) with 20 columns: col = idx % 20, row = idx / 20.
-	var wall_atlas := Vector2i(150 % 20, 150 / 20)
-	var plat_atlas := Vector2i(50 % 20, 50 / 20)
-	src.create_tile(wall_atlas)
-	src.create_tile(plat_atlas)
+	# Wall tile at (0,0); platform tile uses the second texture via a second source.
+	src.create_tile(Vector2i(0, 0))
 
-	# Tile 0: wall, Tile 1: platform (as used by set_cell below).
+	var src2 := TileSetAtlasSource.new()
+	var atlas2 := AtlasTexture.new()
+	atlas2.atlas = load("res://assets/sprites/tile_platform.svg")
+	atlas2.region = Rect2(0, 0, 36, 36)
+	src2.texture = atlas2
+	src2.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	src2.separation = Vector2i.ZERO
+	ts.add_source(src2, 1)
+	src2.create_tile(Vector2i(0, 0))
+
+	# Physics: cell-centered collision polygons (tile spans -9..+9, NOT 0..18).
 	ts.add_physics_layer()
-	# IMPORTANT: TileData collision polygons are tile-local, cell-centered.
-	# The 18px tile spans -9..+9 in both axes — NOT 0..18.
-	var tile_half := 9.0
+	var tile_half := float(TILE_SIZE) / 2.0
 	var solid := PackedVector2Array([
 		Vector2(-tile_half, -tile_half),
 		Vector2(tile_half, -tile_half),
 		Vector2(tile_half, tile_half),
 		Vector2(-tile_half, tile_half),
 	])
-	ts.get_source(0).get_tile_data(wall_atlas, 0).set_collision_polygons_count(0, 1)
-	ts.get_source(0).get_tile_data(wall_atlas, 0).set_collision_polygon_points(0, 0, solid)
+	ts.get_source(0).get_tile_data(Vector2i(0, 0), 0).set_collision_polygons_count(0, 1)
+	ts.get_source(0).get_tile_data(Vector2i(0, 0), 0).set_collision_polygon_points(0, 0, solid)
+	ts.get_source(1).get_tile_data(Vector2i(0, 0), 0).set_collision_polygons_count(0, 1)
+	ts.get_source(1).get_tile_data(Vector2i(0, 0), 0).set_collision_polygon_points(0, 0, solid)
 
-	ts.get_source(0).get_tile_data(plat_atlas, 0).set_collision_polygons_count(0, 1)
-	ts.get_source(0).get_tile_data(plat_atlas, 0).set_collision_polygon_points(0, 0, solid)
-
-	# Return a helper so callers can map wall/platform -> atlas coords.
-	_wall_tile = wall_atlas
-	_plat_tile = plat_atlas
+	_wall_tile = Vector2i(0, 0)  # source 0
+	_plat_tile = Vector2i(0, 0)  # source 1
 	return ts
 
 var _wall_tile: Vector2i = Vector2i.ZERO
@@ -204,8 +214,33 @@ func _camera_setup(target: Node2D) -> void:
 	cam.limit_right = _map_pixel_width()
 	cam.limit_top = -TILE_SIZE * 4
 	cam.limit_bottom = _map_pixel_height() + TILE_SIZE * 4
+	# Drag-margin deadzone: camera advances only when the player pushes the window edge.
+	cam.drag_horizontal_enabled = true
+	cam.drag_left_margin = 0.32
+	cam.drag_right_margin = 0.28
+	cam.drag_vertical_enabled = true
+	cam.drag_top_margin = 0.25
+	cam.drag_bottom_margin = 0.20
 	target.add_child(cam)
 	cam.make_current()
+	_cam = cam
+	# Trauma² screen shake, child of the camera so it composes with smoothing.
+	_shake = preload("res://scripts/levels/camera_shake.gd").new()
+	_shake.name = "CameraShake"
+	cam.add_child(_shake)
+
+## Lookahead (projected focus) + speed-based smoothing for the follow camera.
+func _update_camera() -> void:
+	if _cam == null or not is_instance_valid(_cam) or player == null:
+		return
+	var speed_ratio: float = clampf(absf(player.velocity.x) / 260.0, 0.0, 1.0)
+	_cam.position_smoothing_speed = lerpf(4.0, 12.0, speed_ratio)
+	_cam.drag_horizontal_offset = lerpf(_cam.drag_horizontal_offset, player.facing * 60.0, 6.0 * get_process_delta_time())
+
+## Trauma² screen-shake entry point (called by the player on impact/dash/death).
+func add_trauma(amount: float) -> void:
+	if _shake and is_instance_valid(_shake):
+		_shake.add_trauma(amount)
 
 func _map_pixel_width() -> int:
 	var rows := level_map.strip_edges().split("\n")
@@ -385,12 +420,24 @@ func _spawn_player_at(pos: Vector2) -> void:
 
 func _spawn_hud() -> void:
 	var hud_script := load("res://scripts/ui/hud.gd")
-	_hud = Control.new()
-	_hud.set_script(hud_script)
-	_hud.set("level_index", level_index)
-	_hud.set("level_name", level_name)
-	add_child(_hud)  # _ready() fires automatically on entering the tree
+	# HUD must live on a CanvasLayer so the camera zoom/drift never applies.
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	layer.name = "HUDLayer"
+	var hud := Control.new()
+	hud.set_script(hud_script)
+	hud.set("level_index", level_index)
+	hud.set("level_name", level_name)
+	layer.add_child(hud)
+	add_child(layer)
+	_hud = hud
 
 func _spawn_puzzle_ui() -> void:
+	# Puzzle UI on its own layer ABOVE the CRT overlay (layer 110) so it's
+	# always crisp, centered, and unaffected by camera transforms.
+	var layer := CanvasLayer.new()
+	layer.layer = 110
+	layer.name = "PuzzleLayer"
 	_puzzle_ui = PuzzleUI.new()
-	add_child(_puzzle_ui)
+	layer.add_child(_puzzle_ui)
+	add_child(layer)

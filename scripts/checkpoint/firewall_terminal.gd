@@ -11,6 +11,7 @@ signal access_granted(level_index: int)
 
 var _player: Player = null
 var _in_range: bool = false
+var _puzzle_open: bool = false
 var puzzle: Dictionary = {}
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -28,7 +29,7 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	# Poll the action state so BOTH real key events AND virtual touch buttons
 	# (Input.action_press, which does NOT dispatch _unhandled_input) work.
-	if _in_range and _player and Input.is_action_just_pressed("interact"):
+	if _in_range and _player and not _puzzle_open and Input.is_action_just_pressed("interact"):
 		_open_puzzle()
 
 func _on_body_entered(body: Node2D) -> void:
@@ -44,11 +45,14 @@ func _on_body_exited(body: Node2D) -> void:
 		prompt.hide()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _in_range and _player and event.is_action_pressed("interact"):
+	if _in_range and _player and not _puzzle_open and event.is_action_pressed("interact"):
 		_open_puzzle()
 		get_viewport().set_input_as_handled()
 
 func _open_puzzle() -> void:
+	if _puzzle_open:
+		return  # idempotency guard — prevents double-open on keyboard
+	_puzzle_open = true
 	puzzle = GameManager.get_puzzle_for_level(level_index)
 	puzzle_started.emit(level_index)
 	# The level scene listens and opens the puzzle UI (keeps this class decoupled).

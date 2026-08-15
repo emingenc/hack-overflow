@@ -20,10 +20,20 @@ func _process(delta: float) -> void:
 		_glow.position.x = 640 - 200 + sin(_t * 0.7) * 140
 
 func _build_ui() -> void:
-	# Background: dark with subtle cyan gradient blocks
+	# Background: cyberpunk cityscape (parallax feel) + dark overlay
+	var bg_img := TextureRect.new()
+	bg_img.texture = preload("res://assets/sprites/city_bg.svg")
+	bg_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	bg_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg_img.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg_img.modulate = Color(1, 1, 1, 0.55)
+	bg_img.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg_img)
+
 	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.03, 0.06, 1.0)
+	bg.color = Color(0.02, 0.03, 0.06, 0.82)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
 	# Accent glow bar under title (animated)
@@ -43,7 +53,8 @@ func _build_ui() -> void:
 	_title = Label.new()
 	_title.text = "HACK://OVERFLOW"
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title.add_theme_font_size_override("font_size", 58)
+	_title.add_theme_font_size_override("font_size", 44)
+	_title.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P-Regular.ttf"))
 	_title.add_theme_color_override("font_color", Color(0.1, 0.95, 1.0))
 	_title.add_theme_color_override("font_shadow_color", Color(0.0, 0.4, 0.6, 0.8))
 	_title.add_theme_constant_override("shadow_offset_x", 3)
@@ -53,7 +64,7 @@ func _build_ui() -> void:
 	var subtitle := Label.new()
 	subtitle.text = "// a platformer where every firewall demands an algorithm"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 16)
+	subtitle.add_theme_font_size_override("font_size", 20)
 	subtitle.add_theme_color_override("font_color", Color(0.55, 0.7, 0.95))
 	center.add_child(subtitle)
 
@@ -67,9 +78,12 @@ func _build_ui() -> void:
 	_rebuild_levels()
 
 	var controls := Label.new()
-	controls.text = "A/D or ◀▶  move   ·   W/SPACE  jump (double!)   ·   S  dash   ·   E  hack"
+	if DisplayServer.is_touchscreen_available():
+		controls.text = "◀ ▶ move  ·  ▲ jump (double!)  ·  ⚡ dash  ·  ✦ hack"
+	else:
+		controls.text = "A/D move  ·  W/SPACE jump (double)  ·  S dash  ·  E hack"
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	controls.add_theme_font_size_override("font_size", 13)
+	controls.add_theme_font_size_override("font_size", 18)
 	controls.add_theme_color_override("font_color", Color(0.4, 0.55, 0.8))
 	center.add_child(controls)
 

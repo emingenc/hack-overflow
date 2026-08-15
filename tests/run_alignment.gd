@@ -73,11 +73,12 @@ func _run_level_checks(lv: int) -> void:
 	_info("atlas texture: %s (%s)" % [tex.resource_path, str(tex.get_size())])
 	_info("separation: %s" % str(src.separation))
 
-	var wall: Vector2i = (_level.get("_wall_tile") as Vector2i)
-	var plat: Vector2i = (_level.get("_plat_tile") as Vector2i)
+	var wall: Vector2i = (_level.get("_wall_tile") as Vector2i)  # source 0
+	var plat: Vector2i = (_level.get("_plat_tile") as Vector2i)  # source 1
+	var src2: TileSetAtlasSource = ts.get_source(1) as TileSetAtlasSource
 	# Atlas-region forensics: does the sampled region equal the intended one?
 	_check_region(src, wall, "wall")
-	_check_region(src, plat, "plat")
+	_check_region(src2, plat, "plat")
 
 	# --- Raycast: floor top surface ---
 	var space: PhysicsDirectSpaceState2D = lvl.get_world_2d().direct_space_state
@@ -88,7 +89,7 @@ func _run_level_checks(lv: int) -> void:
 
 	var floor_cell: Vector2i = Vector2i(-1, -1)
 	for cell in tile_layer.get_used_cells():
-		if tile_layer.get_cell_atlas_coords(cell) == wall:
+		if tile_layer.get_cell_source_id(cell) == 0 and tile_layer.get_cell_atlas_coords(cell) == wall:
 			var above := Vector2i(cell.x, cell.y - 1)
 			if tile_layer.get_cell_source_id(above) == -1:
 				floor_cell = cell
@@ -110,7 +111,7 @@ func _run_level_checks(lv: int) -> void:
 	var face_cell: Vector2i = Vector2i(-1, -1)
 	var min_x := 999999
 	for cell in tile_layer.get_used_cells():
-		if tile_layer.get_cell_atlas_coords(cell) == wall:
+		if tile_layer.get_cell_source_id(cell) == 0 and tile_layer.get_cell_atlas_coords(cell) == wall:
 			var left := Vector2i(cell.x - 1, cell.y)
 			if tile_layer.get_cell_source_id(left) == -1 and cell.x < min_x:
 				face_cell = cell

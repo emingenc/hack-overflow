@@ -2,9 +2,9 @@ shader_type canvas_item;
 
 // CRT scanline + vignette overlay for the terminal/cyberpunk look.
 // Renders ONLY dark scanlines/vignette on a TRANSPARENT base — never white.
-uniform float scanline_strength : hint_range(0.0, 1.0) = 0.18;
-uniform float vignette_strength : hint_range(0.0, 1.0) = 0.30;
-uniform float flicker : hint_range(0.0, 1.0) = 0.03;
+uniform float scanline_strength : hint_range(0.0, 1.0) = 0.08;
+uniform float vignette_strength : hint_range(0.0, 1.0) = 0.20;
+uniform float flicker : hint_range(0.0, 1.0) = 0.02;
 uniform vec2 resolution = vec2(1280.0, 720.0);
 
 void fragment() {

@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect x="14" y="18" width="36" height="30" rx="4" fill="none" stroke="#00e5ff" stroke-width="4"/><path d="M14 28 L50 28" stroke="#00e5ff" stroke-width="4"/><path d="M26 18 L26 28 M38 18 L38 28" stroke="#00e5ff" stroke-width="3"/><circle cx="44" cy="40" r="3.5" fill="#3dff8c"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="sh" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <g filter="url(#sh)">
+    <rect x="12" y="16" width="40" height="32" rx="5" fill="none" stroke="#ffffff" stroke-width="5"/>
+    <path d="M12 26 L52 26" stroke="#ffffff" stroke-width="5"/>
+    <path d="M25 16 L25 26 M39 16 L39 26" stroke="#ffffff" stroke-width="4"/>
+    <circle cx="45" cy="40" r="4" fill="#3dff8c"/>
+  </g>
+</svg>

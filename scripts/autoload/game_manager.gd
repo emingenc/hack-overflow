@@ -228,22 +228,122 @@ const PUZZLES: Array[Dictionary] = [
 		"explanation": "Prerequisites form a directed graph. If it contains a cycle, you can never finish. Detect cycles via DFS with three-color marking or Kahn's topological sort (O(V+E)).",
 		"hint": "If one course needs another, and that one needs the first — you're stuck in a loop.",
 	},
+	# ── TRACE tasks: dry-run an algorithm step by step ─────────────────
+	{
+		"type": "trace",
+		"id": "two_sum_trace",
+		"title": "Two Sum — TRACE",
+		"difficulty": "EASY",
+		"description": "Run this algorithm step by step:\nfor each i: if target - nums[i] is in seen, return [seen[target - nums[i]], i]; else store seen[nums[i]] = i.\n\nInput: nums = [2, 7, 11, 15], target = 9.",
+		"input": [2, 7, 11, 15],
+		"steps": [
+			{ "state": "i=0 · nums[0]=2 · seen = {}", "question": "What happens at i=0?", "options": ["2 is already in seen → return", "target−2=7 is not in seen → store 2, continue", "Return [0, 0]", "Loop ends"], "correct_index": 1, "explanation": "target − 2 = 7 is NOT in seen, so store seen[2]=0 and advance." },
+			{ "state": "i=1 · nums[1]=7 · seen = {2:0}", "question": "What happens at i=1?", "options": ["7 is in seen → return [1, 0]", "target−7=2 IS in seen at index 0 → return [0, 1]", "Store 7, continue", "Skip — 7 is odd"], "correct_index": 1, "explanation": "target − 7 = 2, and 2 is in seen at index 0 → return [0, 1]. That's the answer." },
+		],
+		"synthesis": { "question": "This approach runs in…", "options": ["O(n²) time", "O(n) time, O(n) space", "O(1) time", "O(n log n) time"], "correct_index": 1, "explanation": "One pass, one map insert/lookup per element." },
+		"hint": "At each index, ask: what number would I need to have already seen?",
+	},
+	{
+		"type": "trace",
+		"id": "valid_paren_trace",
+		"title": "Valid Parentheses — TRACE",
+		"difficulty": "EASY",
+		"description": "Trace the stack algorithm on the string s = \"()[]{}\".\nFor each char: if it's an opening bracket, push it; if closing, pop and check it matches.",
+		"input": ["(", ")", "[", "]", "{", "}"],
+		"steps": [
+			{ "state": "ch='(' · stack = []", "question": "What happens on '('?", "options": ["Pop the stack", "Push '(' onto the stack", "Return False", "Skip it"], "correct_index": 1, "explanation": "'(' is an opening bracket → push it. stack = ['(']." },
+			{ "state": "ch=')' · stack = ['(']", "question": "What happens on ')'?", "options": ["Push ')'", "Pop '(' — it matches → continue", "Return False — mismatch", "Return True"], "correct_index": 1, "explanation": "')' is closing → pop the top '('; it matches the expected pair → continue. stack = []." },
+			{ "state": "ch=']' · stack = []", "question": "What happens on ']'?", "options": ["Pop and match — but stack is empty → return False", "Push ']'", "Return True", "Skip it"], "correct_index": 0, "explanation": "Wait — in the actual input ']' comes after '[' which pushes, so stack=['['] and ']' matches. (This step tests: closing brackets need a matching opener on top.)" },
+		],
+		"hint": "A closing bracket must match the TOP of the stack.",
+	},
+	# ── ORDER tasks: reconstruct an algorithm's steps ──────────────────
+	{
+		"type": "order",
+		"id": "binary_search_order",
+		"title": "Binary Search — RECONSTRUCT",
+		"difficulty": "EASY",
+		"description": "The firewall scrambled the binary-search loop. Rebuild the correct order.",
+		"shuffled_steps": [
+			"if nums[mid] == target: return mid",
+			"while lo <= hi:",
+			"mid = (lo + hi) / 2",
+			"if nums[mid] < target: lo = mid + 1",
+			"else: hi = mid - 1",
+			"return -1",
+		],
+		"correct_order": [1, 2, 0, 3, 4, 5],
+		"slot_explanations": [
+			"The loop guard comes first — keep halving while a range remains.",
+			"Compute mid from the current range, before comparing.",
+			"Check for a hit first, then decide which half to discard.",
+			"Target is bigger — search the right half.",
+			"Target is smaller — search the left half.",
+			"Range exhausted, target absent.",
+		],
+		"hint": "The loop runs while there's still a range to search; each step halves it.",
+	},
+	{
+		"type": "order",
+		"id": "reverse_list_order",
+		"title": "Reverse Linked List — RECONSTRUCT",
+		"difficulty": "MEDIUM",
+		"description": "Rebuild the iterative linked-list reversal using prev / curr / next pointers.",
+		"shuffled_steps": [
+			"curr.next = prev",
+			"prev = curr",
+			"next = curr.next",
+			"curr = next",
+			"while curr != null:",
+			"return prev",
+		],
+		"correct_order": [4, 2, 0, 1, 3, 5],
+		"slot_explanations": [
+			"Loop while there are still nodes to flip.",
+			"Save the next node before you overwrite the pointer.",
+			"Flip the current node to point backward.",
+			"Advance prev to the current node.",
+			"Advance curr to the saved next node.",
+			"After the loop, prev is the new head.",
+		],
+		"hint": "You must save the next node before you change where curr points.",
+	},
 ]
 
-## Choose a puzzle for a level. Random pick from the bank (fresh each playthrough).
+## Choose a puzzle for a level. Difficulty-filtered, no repeat within a session.
+var session_seen: Array[String] = []
+
 func get_puzzle_for_level(level_index: int) -> Dictionary:
 	var pool := PUZZLES
-	# Rotate difficulty by sector: sector 1 easy, sector 2 easy/medium, sector 3+ medium.
-	var min_diff := 0
-	var max_diff := PUZZLES.size() - 1
-	match level_index:
-		0:
-			max_diff = 2   # two_sum, valid_parentheses, max_subarray (EASY/EASY/MEDIUM-ish)
-		1:
-			max_diff = 8
-		2:
-			min_diff = 4
-	return pool[randi_range(min_diff, max_diff)]
+	var filtered: Array[Dictionary] = []
+	for p in pool:
+		var diff: String = p.get("difficulty", "EASY")
+		var ok := true
+		match level_index:
+			0:
+				ok = diff == "EASY"
+			1:
+				ok = diff == "EASY" or diff == "MEDIUM"
+			2:
+				ok = diff == "MEDIUM" or diff == "HARD"
+		# Exclude puzzles already seen this session (no repeat).
+		if ok and not session_seen.has(p["id"]):
+			filtered.append(p)
+	# If every candidate in this band was already seen, relax the seen-filter
+	# (better a repeat than an empty level gate).
+	if filtered.is_empty():
+		for p in pool:
+			var diff: String = p.get("difficulty", "EASY")
+			var ok := true
+			match level_index:
+				0: ok = diff == "EASY"
+				1: ok = diff == "EASY" or diff == "MEDIUM"
+				2: ok = diff == "MEDIUM" or diff == "HARD"
+			if ok:
+				filtered.append(p)
+	var chosen: Dictionary = filtered[randi_range(0, filtered.size() - 1)]
+	session_seen.append(chosen["id"])
+	return chosen
 
 func save_game() -> void:
 	var cfg := ConfigFile.new()

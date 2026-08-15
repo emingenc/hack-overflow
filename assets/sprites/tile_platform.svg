@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#161d38"/>
+      <stop offset="50%" stop-color="#0d1328"/>
+      <stop offset="100%" stop-color="#080c1e"/>
+    </linearGradient>
+    <linearGradient id="topglow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3dff8c" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#3dff8c" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="36" height="36" fill="url(#metal)"/>
+  <!-- neon top edge — green = active platform -->
+  <rect x="0" y="0" width="36" height="2.5" fill="url(#topglow)"/>
+  <!-- under-glow -->
+  <rect x="0" y="33" width="36" height="3" fill="#3dff8c" opacity="0.08"/>
+  <!-- panel lines -->
+  <path d="M0 0 H36 M0 36 H36" stroke="#1d2547" stroke-width="1.5" fill="none"/>
+  <path d="M8 8 H28 M8 12 H28" stroke="#131a38" stroke-width="1" fill="none"/>
+  <circle cx="9" cy="22" r="1.5" fill="#2a3566"/>
+  <circle cx="27" cy="22" r="1.5" fill="#2a3566"/>
+</svg>
