@@ -117,7 +117,7 @@ player.gd::GDScript::1178108795597343854::1786808485::0::1::::Player<>CharacterB
 hud.gd::GDScript::6950217780590699666::1786769460::0::1::::<>Control<><>0<>0<><>::
 main_menu.gd::GDScript::6210041082953620047::1786812509::0::1::::<>Control<><>0<>0<><>::
 touch_controls.gd::GDScript::543023621439938449::1786767260::0::1::::<>CanvasLayer<><>0<>0<><>::
-::res://tests/::1786814229
+::res://tests/::1786814322
 _mobile_ux_probe_runner_tmp.tscn::PackedScene::-1::1786676593::0::1::::<><><>0<>0<><>::res://tests/_mobile_ux_probe_tmp.gd
 _mobile_ux_probe_tmp.gd::GDScript::2046860884256791067::1786676590::0::1::::<>Node<><>0<>0<><>::
 inspect_chars.gd::GDScript::3663006951331077268::1786808052::0::1::::<>SceneTree<><>0<>0<><>::
@@ -129,7 +129,7 @@ playtest_runner.tscn::PackedScene::-1::1786665878::0::1::::<><><>0<>0<><>::res:/
 probe_runner.tscn::PackedScene::-1::1786665878::0::1::::<><><>0<>0<><>::res://tests/run_probe.gd
 render_puzzle.gd::GDScript::872942791422906261::1786809998::0::1::::<>Node<><>0<>0<><>::
 render_puzzle_runner.tscn::PackedScene::-1::1786809977::0::1::::<><><>0<>0<><>::res://tests/render_puzzle.gd
-run_alignment.gd::GDScript::6180407837804573829::1786814229::0::1::::<>SceneTree<><>0<>0<><>::
+run_alignment.gd::GDScript::6180407837804573829::1786814312::0::1::::<>SceneTree<><>0<>0<><>::
 run_integrity.gd::GDScript::1226746605576643886::1786771574::0::1::::<>Node<><>0<>0<><>::
 run_playtest.gd::GDScript::2912270661604696952::1786665878::0::1::::<>Node<><>0<>0<><>::
 run_probe.gd::GDScript::502548173077931241::1786665878::0::1::::<>Node<><>0<>0<><>::
