@@ -24,13 +24,13 @@ func _build_ui() -> void:
 	var pad := 12.0 * s
 
 	# D-pad (bottom-left): cyan
-	var left := _make_button("res://assets/sprites/ui_icon_left.svg", "move_left", Color(0.1, 0.7, 1.0), Color(0.5, 0.95, 1.0))
+	var left := _make_button("res://assets/sprites/ui_icon_left.svg", "move_left", Color(0.1, 1.0, 0.3), Color(0.5, 1.0, 0.5))
 	left.size = Vector2(96 * s, 96 * s)
 	left.position = Vector2(pad, vp.y - (96 * s) - pad)
 	add_child(left)
 	_buttons.append(left)
 
-	var right := _make_button("res://assets/sprites/ui_icon_right.svg", "move_right", Color(0.1, 0.7, 1.0), Color(0.5, 0.95, 1.0))
+	var right := _make_button("res://assets/sprites/ui_icon_right.svg", "move_right", Color(0.1, 1.0, 0.3), Color(0.5, 1.0, 0.5))
 	right.size = Vector2(96 * s, 96 * s)
 	right.position = Vector2(pad + 104 * s, vp.y - (96 * s) - pad)
 	add_child(right)
@@ -50,7 +50,7 @@ func _build_ui() -> void:
 	add_child(dash)
 	_buttons.append(dash)
 
-	var act := _make_button("res://assets/sprites/ui_icon_hack.svg", "interact", Color(0.85, 0.35, 1.0), Color(1.0, 0.7, 1.0))
+	var act := _make_button("res://assets/sprites/ui_icon_hack.svg", "interact", Color(0.31, 0.31, 0.67), Color(0.5, 0.5, 0.8))
 	act.size = Vector2(btn * 0.78, btn * 0.78)
 	act.position = Vector2(vp.x - btn - pad - btn * 0.78 - 10 * s - btn * 0.78 - 10 * s, vp.y - btn - pad)
 	add_child(act)

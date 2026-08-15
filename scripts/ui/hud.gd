@@ -26,7 +26,7 @@ func _ready() -> void:
 	_name_label = Label.new()
 	_name_label.text = "SECTOR: " + level_name
 	_name_label.add_theme_font_size_override("font_size", 15)
-	_name_label.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	_name_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	hbox.add_child(_name_label)
 
 	_chips_label = Label.new()
@@ -88,7 +88,7 @@ func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> voi
 	stats.text = "CHIPS %d/%d   ·   TIME %.1fs   ·   PUZZLE SOLVED" % [chips, total, time_seconds]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.add_theme_font_size_override("font_size", 18)
-	stats.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	stats.add_theme_color_override("font_color", Color(0.75, 1.0, 0.6))
 	center.add_child(stats)
 
 	var next_btn := Button.new()

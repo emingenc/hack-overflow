@@ -173,7 +173,7 @@ func _spawn_dust() -> void:
 	p.initial_velocity_max = 80.0
 	p.scale_amount_min = 0.5
 	p.scale_amount_max = 1.0
-	p.color = Color(0.0, 0.9, 1.0, 0.6)
+	p.color = Color(0.0, 1.0, 0.25, 0.5)
 	p.finished.connect(p.queue_free)
 	add_child(p)
 

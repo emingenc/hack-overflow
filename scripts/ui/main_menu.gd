@@ -40,7 +40,7 @@ func _build_ui() -> void:
 	_glow = ColorRect.new()
 	_glow.size = Vector2(400, 3)
 	_glow.position = Vector2(440, 150)
-	_glow.color = Color(0.0, 0.9, 1.0, 0.6)
+	_glow.color = Color(0.0, 1.0, 0.25, 0.5)
 	add_child(_glow)
 
 	var center := VBoxContainer.new()
@@ -55,7 +55,7 @@ func _build_ui() -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.add_theme_font_size_override("font_size", 44)
 	_title.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P-Regular.ttf"))
-	_title.add_theme_color_override("font_color", Color(0.1, 0.95, 1.0))
+	_title.add_theme_color_override("font_color", Color(0.1, 1.0, 0.3))
 	_title.add_theme_color_override("font_shadow_color", Color(0.0, 0.4, 0.6, 0.8))
 	_title.add_theme_constant_override("shadow_offset_x", 3)
 	_title.add_theme_constant_override("shadow_offset_y", 3)
@@ -65,7 +65,7 @@ func _build_ui() -> void:
 	subtitle.text = "// a platformer where every firewall demands an algorithm"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 20)
-	subtitle.add_theme_color_override("font_color", Color(0.55, 0.7, 0.95))
+	subtitle.add_theme_color_override("font_color", Color(0.4, 0.8, 0.45))
 	center.add_child(subtitle)
 
 	var spacer := Control.new()
@@ -84,7 +84,7 @@ func _build_ui() -> void:
 		controls.text = "A/D move  ·  W/SPACE jump (double)  ·  S dash  ·  E hack"
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls.add_theme_font_size_override("font_size", 18)
-	controls.add_theme_color_override("font_color", Color(0.4, 0.55, 0.8))
+	controls.add_theme_color_override("font_color", Color(0.35, 0.75, 0.4))
 	center.add_child(controls)
 
 	var stats := Label.new()
@@ -102,9 +102,9 @@ func _build_ui() -> void:
 	quit_btn.text = "QUIT"
 	quit_btn.custom_minimum_size = Vector2(200, 38)
 	quit_btn.pressed.connect(func() -> void: get_tree().quit())
-	quit_btn.add_theme_stylebox_override("normal", _style(Color(0.08, 0.12, 0.22), Color(0.4, 0.4, 0.5, 0.15)))
-	quit_btn.add_theme_stylebox_override("hover", _style(Color(0.12, 0.18, 0.32), Color(0.0, 0.9, 1.0, 0.4)))
-	quit_btn.add_theme_stylebox_override("pressed", _style(Color(0.04, 0.08, 0.14), Color(0.0, 0.9, 1.0, 0.6)))
+	quit_btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.09, 0.06), Color(0.4, 0.4, 0.5, 0.15)))
+	quit_btn.add_theme_stylebox_override("hover", _style(Color(0.04, 0.12, 0.08), Color(0.0, 1.0, 0.25, 0.35)))
+	quit_btn.add_theme_stylebox_override("pressed", _style(Color(0.03, 0.06, 0.04), Color(0.0, 1.0, 0.25, 0.5)))
 	center.add_child(quit_btn)
 
 func _rebuild_levels() -> void:
@@ -119,15 +119,15 @@ func _rebuild_levels() -> void:
 			btn.text = "▶  " + names[i]
 			btn.pressed.connect(func() -> void:
 				get_tree().change_scene_to_file(GameManager.LEVELS[i]))
-			btn.add_theme_stylebox_override("normal", _style(Color(0.09, 0.16, 0.38), Color(0.0, 0.9, 1.0, 0.35)))
-			btn.add_theme_stylebox_override("hover", _style(Color(0.13, 0.24, 0.55), Color(0.2, 1.0, 1.0, 0.6)))
-			btn.add_theme_stylebox_override("pressed", _style(Color(0.05, 0.1, 0.25), Color(0.0, 0.9, 1.0, 0.8)))
-			btn.add_theme_color_override("font_color", Color(0.8, 0.95, 1.0))
+			btn.add_theme_stylebox_override("normal", _style(Color(0.04, 0.12, 0.08), Color(0.0, 1.0, 0.25, 0.3)))
+			btn.add_theme_stylebox_override("hover", _style(Color(0.05, 0.16, 0.10), Color(0.2, 1.0, 0.35, 0.5)))
+			btn.add_theme_stylebox_override("pressed", _style(Color(0.03, 0.08, 0.05), Color(0.0, 1.0, 0.25, 0.7)))
+			btn.add_theme_color_override("font_color", Color(0.75, 1.0, 0.6))
 		else:
 			btn.text = "⛨  " + names[i] + "   —  solve previous sector"
 			btn.disabled = true
-			btn.add_theme_stylebox_override("normal", _style(Color(0.06, 0.08, 0.14), Color(0.2, 0.3, 0.4, 0.15)))
-			btn.add_theme_color_override("font_color", Color(0.35, 0.42, 0.55))
+			btn.add_theme_stylebox_override("normal", _style(Color(0.03, 0.06, 0.04), Color(0.2, 0.3, 0.4, 0.15)))
+			btn.add_theme_color_override("font_color", Color(0.25, 0.5, 0.3))
 		btn.add_theme_font_size_override("font_size", 18)
 		_levels_box.add_child(btn)
 

@@ -76,7 +76,7 @@ func _build_ui() -> void:
 
 	_title_label = Label.new()
 	_title_label.add_theme_font_size_override("font_size", 24)
-	_title_label.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	_title_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title_label)
 
@@ -107,7 +107,7 @@ func _build_ui() -> void:
 	# CRITICAL: wrap the problem text or it clips past the panel edge on phones.
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_desc_label.add_theme_font_size_override("normal_font_size", 17)
-	_desc_label.add_theme_color_override("default_color", Color(0.9, 0.95, 1.0))
+	_desc_label.add_theme_color_override("default_color", Color(0.85, 1.0, 0.7))
 	scroll.add_child(_desc_label)
 
 	# Options
@@ -167,10 +167,10 @@ func _build_ui() -> void:
 func _make_panel_style() -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.07, 0.1, 0.22, 0.97)
-	sb.border_color = Color(0.0, 0.9, 1.0, 0.6)
+	sb.border_color = Color(0.0, 1.0, 0.25, 0.5)
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(10)
-	sb.shadow_color = Color(0.0, 0.9, 1.0, 0.3)
+	sb.shadow_color = Color(0.0, 1.0, 0.25, 0.25)
 	sb.shadow_size = 24
 	return sb
 
@@ -204,7 +204,7 @@ func show_puzzle(data: Dictionary) -> void:
 	_attempts_label.text = ""
 	_desc_label.text = puzzle.description
 	_feedback_label.text = ""
-	_feedback_label.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	_feedback_label.add_theme_color_override("font_color", Color(0.85, 1.0, 0.7))
 	_hint_label.text = ""
 	_hint_button.text = "GET HINT"
 	_hint_button.disabled = false
@@ -351,7 +351,7 @@ func _refresh_order_slots() -> void:
 			_slot_buttons[s].add_theme_color_override("font_color", Color(0.6, 0.65, 0.75))
 		else:
 			_slot_buttons[s].text = "%d.  %s" % [s + 1, shuffled[idx]]
-			_slot_buttons[s].add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+			_slot_buttons[s].add_theme_color_override("font_color", Color(0.85, 1.0, 0.7))
 
 func _on_option_pressed(index: int) -> void:
 	if _answered:
@@ -363,7 +363,7 @@ func _on_option_pressed(index: int) -> void:
 	for i in range(_options_box.get_child_count()):
 		var btn := _options_box.get_child(i) as Button
 		var selected := i == index
-		btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.7) if selected else Color(0.85, 0.9, 1.0))
+		btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.7) if selected else Color(0.8, 1.0, 0.65))
 		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.14, 0.2, 0.4) if selected else Color(0.12, 0.16, 0.35)))
 
 func _on_submit() -> void:
@@ -413,7 +413,7 @@ func _on_submit_mcq() -> void:
 				btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.2, 0.1, 0.1)))
 			else:
 				btn.disabled = false
-				btn.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
+				btn.add_theme_color_override("font_color", Color(0.8, 1.0, 0.65))
 				btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
 		_selected = -1
 		_submit_button.disabled = true
