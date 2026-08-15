@@ -49,15 +49,14 @@ func _spawn_matrix_rain() -> void:
 	rain.name = "MatrixRainLayer"
 	add_child(rain)
 
-## CRT scanline + vignette overlay on its own canvas layer (always on top).
+## Full-screen post stack (bloom + scanlines + dither + vignette) on its own layer.
 func _spawn_crt_overlay() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	layer.name = "CRTLayer"
 	add_child(layer)
 	var crt := ColorRect.new()
-	# Base color is irrelevant — the shader outputs only dark overlay alpha.
-	crt.color = Color(0, 0, 0, 0)
+	crt.color = Color.WHITE  # shader replaces this with the post-processed screen
 	crt.set_anchors_preset(Control.PRESET_FULL_RECT)
 	crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	crt.material = ShaderMaterial.new()

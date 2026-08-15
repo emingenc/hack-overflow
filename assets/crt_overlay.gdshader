@@ -1,27 +1,34 @@
 shader_type canvas_item;
 
-// CRT scanline + vignette overlay for the terminal/cyberpunk look.
-// Renders ONLY dark scanlines/vignette on a TRANSPARENT base — never white.
-uniform float scanline_strength : hint_range(0.0, 1.0) = 0.08;
-uniform float vignette_strength : hint_range(0.0, 1.0) = 0.20;
-uniform float flicker : hint_range(0.0, 1.0) = 0.02;
-uniform vec2 resolution = vec2(1280.0, 720.0);
+// Post-processing stack (single pass, compat-safe): whole-screen bloom via LOD
+// screen blur + flat scanlines + blue-noise dither + subtle vignette.
+uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_linear_mipmap;
+uniform float bloom_strength : hint_range(0.0, 1.0) = 0.32;
+uniform float scanline_strength : hint_range(0.0, 1.0) = 0.07;
+uniform float vignette_strength : hint_range(0.0, 1.0) = 0.22;
+uniform float dither_strength : hint_range(0.0, 2.0) = 1.0;
+
+float hash21(vec2 p) {
+	p = fract(p * vec2(123.34, 456.21));
+	p += dot(p, p + 45.32);
+	return fract(p.x * p.y);
+}
 
 void fragment() {
-	vec2 uv = UV;
+	vec3 base = texture(screen_texture, SCREEN_UV).rgb;
 
-	// Scanlines (dark bars, transparent elsewhere)
-	float scanline = sin(uv.y * resolution.y * 0.5) * 0.5 + 0.5;
-	float alpha = scanline_strength * scanline;
+	// Whole-screen bloom: add a blurred (high-LOD) copy back on itself.
+	vec3 col = base + textureLod(screen_texture, SCREEN_UV, 3.0).rgb * bloom_strength;
 
-	// Vignette (darken corners, transparent center)
-	vec2 dist = uv - vec2(0.5);
-	float vig = vignette_strength * dot(dist, dist) * 2.5;
-	alpha += vig;
+	// Flat scanlines (LED-panel, no curvature — the 2026 read).
+	col *= 1.0 - scanline_strength * (0.5 + 0.5 * sin(SCREEN_UV.y * 6.28318 * 720.0 / 3.5));
 
-	// Subtle flicker on the darkening
-	float time_flicker = 1.0 - flicker * (0.5 + 0.5 * sin(TIME * 24.0));
+	// Blue-noise dither (compat has no debanding).
+	col += (hash21(floor(SCREEN_UV / SCREEN_PIXEL_SIZE) + vec2(TIME * 30.0)) - 0.5) * dither_strength / 255.0;
 
-	// Black overlay at computed alpha; game pixels show through everywhere else.
-	COLOR = vec4(0.0, 0.0, 0.0, clamp(alpha * time_flicker, 0.0, 0.45));
+	// Subtle vignette.
+	vec2 d = SCREEN_UV - vec2(0.5);
+	col *= 1.0 - vignette_strength * dot(d, d) * 1.4;
+
+	COLOR = vec4(col, 1.0);
 }
