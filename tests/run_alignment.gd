@@ -94,7 +94,7 @@ func _run_level_checks(lv: int) -> void:
 			if tile_layer.get_cell_source_id(above) == -1:
 				floor_cell = cell
 				break
-	if floor_cell.x >= 0:
+	if floor_cell.y >= 0:
 		var top_y: float = floor_cell.y * TILE
 		var x_ray: float = floor_cell.x * TILE + TILE / 2.0
 		var hit: Dictionary = _ray(space, Vector2(x_ray, top_y - 30.0), Vector2(x_ray, top_y + 30.0), exclude)
@@ -116,7 +116,7 @@ func _run_level_checks(lv: int) -> void:
 			if tile_layer.get_cell_source_id(left) == -1 and cell.x < min_x:
 				face_cell = cell
 				min_x = cell.x
-	if face_cell.x >= 0:
+	if min_x != 999999:
 		var face_x: float = face_cell.x * TILE
 		var y_ray: float = face_cell.y * TILE + TILE / 2.0
 		var hit: Dictionary = _ray(space, Vector2(face_x - 30.0, y_ray), Vector2(face_x + 30.0, y_ray), exclude)
