@@ -15,7 +15,7 @@ func _ready() -> void:
 	bar.position = Vector2(0, 0)
 	bar.custom_minimum_size = Vector2(0, 44)
 	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	bar.modulate = Color(0.08, 0.12, 0.28, 0.85)
+	bar.modulate = Color(0.03, 0.08, 0.05, 0.85)
 	add_child(bar)
 
 	var hbox := HBoxContainer.new()
@@ -44,7 +44,7 @@ func _ready() -> void:
 	hint.position.y -= 4
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 12)
-	hint.add_theme_color_override("font_color", Color(0.5, 0.6, 0.8, 0.7))
+	hint.add_theme_color_override("font_color", Color(0.45, 0.75, 0.5, 0.7))
 	add_child(hint)
 
 	update_chips(0, GameManager.chips_total[level_index])
@@ -67,7 +67,7 @@ func update_chips(collected: int, total: int) -> void:
 func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> void:
 	# Level complete overlay
 	var overlay := ColorRect.new()
-	overlay.color = Color(0.02, 0.05, 0.1, 0.9)
+	overlay.color = Color(0.02, 0.06, 0.03, 0.9)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
 
