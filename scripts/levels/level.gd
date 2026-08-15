@@ -36,6 +36,7 @@ var _shake: Node = null
 func _ready() -> void:
 	GameManager.chips_total[level_index] = 0
 	_spawn_matrix_rain()
+	_spawn_ambient_particles()
 	_build_parallax()
 	_build_from_map()
 	_spawn_hud()
@@ -48,6 +49,40 @@ func _spawn_matrix_rain() -> void:
 	var rain := preload("res://scripts/levels/matrix_rain.gd").new()
 	rain.name = "MatrixRainLayer"
 	add_child(rain)
+
+## Ambient rising data sparks (additive green dots) — the world is streaming data.
+func _spawn_ambient_particles() -> void:
+	var p := GPUParticles2D.new()
+	p.amount = 48
+	p.lifetime = 3.0
+	p.position = Vector2(_map_pixel_width() * 0.5, _map_pixel_height() + 40)
+	var mat := ParticleProcessMaterial.new()
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	mat.emission_box_extents = Vector3(_map_pixel_width() * 0.5, 6.0, 1.0)
+	mat.direction = Vector3(0, -1, 0)
+	mat.spread = 20.0
+	mat.initial_velocity_min = 40.0
+	mat.initial_velocity_max = 130.0
+	mat.gravity = Vector3.ZERO
+	mat.scale_min = 1.0
+	mat.scale_max = 2.5
+	mat.color = Color(0.35, 1.0, 0.6)
+	p.process_material = mat
+	var cm := CanvasItemMaterial.new()
+	cm.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	p.material = cm
+	p.texture = _make_dot_texture()
+	p.name = "DataSparks"
+	add_child(p)
+	p.emitting = true
+
+func _make_dot_texture() -> ImageTexture:
+	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	for y in 8:
+		for x in 8:
+			var d := Vector2(x - 3.5, y - 3.5).length() / 4.0
+			img.set_pixel(x, y, Color(1, 1, 1, clampf(1.0 - d, 0.0, 1.0)))
+	return ImageTexture.create_from_image(img)
 
 ## Full-screen post stack (bloom + scanlines + dither + vignette) on its own layer.
 func _spawn_crt_overlay() -> void:

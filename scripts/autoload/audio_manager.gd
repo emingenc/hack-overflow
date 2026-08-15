@@ -9,17 +9,10 @@ var sfx_volume: float = 0.8
 var _music_player: AudioStreamPlayer
 
 func _ready() -> void:
-	# Create buses: SFX and Music
-	var sfx_idx := AudioServer.get_bus_index("SFX")
-	if sfx_idx == -1:
-		AudioServer.add_bus()
-		sfx_idx = AudioServer.bus_count - 1
-		AudioServer.set_bus_name(sfx_idx, "SFX")
-	var music_idx := AudioServer.get_bus_index("Music")
-	if music_idx == -1:
-		AudioServer.add_bus()
-		music_idx = AudioServer.bus_count - 1
-		AudioServer.set_bus_name(music_idx, "Music")
+	# Audio buses: Master → Music | SFX | Ambience.
+	_ensure_bus("SFX")
+	_ensure_bus("Music")
+	_ensure_bus("Ambience")
 
 	# Cache a few synthesized samples.
 	_buses["jump"] = _synth_square(0.25, 320.0, 660.0)
@@ -88,6 +81,19 @@ func _make_loop() -> AudioStreamWAV:
 	wav.loop_end = frames
 	return wav
 
+func _ensure_bus(name: String) -> void:
+	if AudioServer.get_bus_index(name) == -1:
+		var idx := AudioServer.bus_count
+		AudioServer.add_bus()
+		AudioServer.set_bus_name(idx, name)
+
+## Per-action volume controls (wired to settings later).
+func set_sfx_volume(v: float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(clampf(v, 0.0, 1.0)))
+
+func set_music_volume(v: float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(clampf(v, 0.0, 1.0)))
+
 func play(sound_name: String, volume_db: float = 0.0) -> void:
 	if not _buses.has(sound_name):
 		return
@@ -95,6 +101,7 @@ func play(sound_name: String, volume_db: float = 0.0) -> void:
 	ap.stream = _buses[sound_name]
 	ap.bus = "SFX"
 	ap.volume_db = volume_db
+	ap.pitch_scale = randf_range(0.9, 1.1)  # ±10% pitch variation kills repetition fatigue
 	add_child(ap)
 	ap.play()
 	ap.finished.connect(func() -> void: ap.queue_free())
