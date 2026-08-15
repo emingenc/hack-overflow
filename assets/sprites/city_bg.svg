@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0a0618"/>
-      <stop offset="45%" stop-color="#150b2e"/>
-      <stop offset="75%" stop-color="#1f1040"/>
+      <stop offset="0%" stop-color="#040806"/>
+      <stop offset="45%" stop-color="#090e0c"/>
+      <stop offset="75%" stop-color="#0d1511"/>
       <stop offset="100%" stop-color="#2a1555"/>
     </linearGradient>
     <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ff2fd6" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#ff2fd6" stop-opacity="0.10"/>
+      <stop offset="0%" stop-color="#ffb000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#ffb000" stop-opacity="0.10"/>
     </linearGradient>
     <radialGradient id="moon" cx="0.5" cy="0.5" r="0.5">
       <stop offset="0%" stop-color="#9fe8ff"/>
@@ -35,7 +35,7 @@
   <circle cx="1060" cy="70" r="34" fill="url(#moon)"/>
 
   <!-- Far layer: distant towers (dark, low detail) -->
-  <g fill="#120a26">
+  <g fill="#080d0a">
     <rect x="20" y="200" width="60" height="160"/>
     <rect x="90" y="230" width="45" height="130"/>
     <rect x="150" y="190" width="70" height="170"/>
@@ -67,7 +67,7 @@
   </g>
 
   <!-- Mid layer: mid towers with more detail + cyan window grids -->
-  <g fill="#0d0820">
+  <g fill="#050a08">
     <rect x="60" y="160" width="80" height="200"/>
     <rect x="180" y="140" width="90" height="220"/>
     <rect x="300" y="170" width="70" height="190"/>
@@ -81,7 +81,7 @@
   </g>
 
   <!-- Cyan windows on mid layer -->
-  <g fill="#00e5ff" opacity="0.75">
+  <g fill="#00ff41" opacity="0.75">
     <rect x="70" y="175" width="8" height="6"/><rect x="90" y="190" width="8" height="6"/><rect x="110" y="210" width="8" height="6"/><rect x="80" y="230" width="8" height="6"/><rect x="105" y="255" width="8" height="6"/>
     <rect x="190" y="155" width="10" height="6"/><rect x="215" y="175" width="10" height="6"/><rect x="240" y="200" width="10" height="6"/><rect x="195" y="225" width="10" height="6"/><rect x="225" y="250" width="10" height="6"/>
     <rect x="310" y="185" width="8" height="6"/><rect x="335" y="210" width="8" height="6"/><rect x="355" y="240" width="8" height="6"/>
@@ -95,7 +95,7 @@
   </g>
 
   <!-- Magenta accent windows (rare, glowing) -->
-  <g fill="#ff2fd6" opacity="0.9" filter="url(#glow)">
+  <g fill="#ffb000" opacity="0.9" filter="url(#glow)">
     <rect x="225" y="180" width="6" height="6"/>
     <rect x="480" y="170" width="6" height="6"/>
     <rect x="720" y="165" width="6" height="6"/>
@@ -104,35 +104,35 @@
   </g>
 
   <!-- Antennas -->
-  <g stroke="#1a0f2e" stroke-width="2">
+  <g stroke="#0b140c" stroke-width="2">
     <line x1="225" y1="140" x2="225" y2="100"/>
     <line x1="225" y1="100" x2="233" y2="92"/>
     <line x1="472" y1="150" x2="472" y2="112"/>
     <line x1="472" y1="112" x2="466" y2="104"/>
     <line x1="717" y1="145" x2="717" y2="108"/>
-    <circle cx="717" cy="105" r="3" fill="#ff2fd6" filter="url(#glow)"/>
+    <circle cx="717" cy="105" r="3" fill="#ffb000" filter="url(#glow)"/>
     <line x1="1212" y1="150" x2="1212" y2="110"/>
-    <circle cx="1212" cy="107" r="3" fill="#00e5ff" filter="url(#glow)"/>
+    <circle cx="1212" cy="107" r="3" fill="#00ff41" filter="url(#glow)"/>
   </g>
 
   <!-- Holographic billboards -->
   <g filter="url(#glow)">
-    <rect x="185" y="300" width="90" height="26" fill="#1a1040" stroke="#00e5ff" stroke-width="1.5" opacity="0.95"/>
-    <rect x="192" y="307" width="24" height="12" fill="#ff2fd6" opacity="0.9"/>
-    <text x="222" y="316" font-family="monospace" font-size="11" fill="#00e5ff">SYS</text>
-    <rect x="440" y="310" width="70" height="22" fill="#120a26" stroke="#ff2fd6" stroke-width="1.5" opacity="0.95"/>
+    <rect x="185" y="300" width="90" height="26" fill="#0b1511" stroke="#00ff41" stroke-width="1.5" opacity="0.95"/>
+    <rect x="192" y="307" width="24" height="12" fill="#ffb000" opacity="0.9"/>
+    <text x="222" y="316" font-family="monospace" font-size="11" fill="#00ff41">SYS</text>
+    <rect x="440" y="310" width="70" height="22" fill="#080d0a" stroke="#ffb000" stroke-width="1.5" opacity="0.95"/>
     <text x="450" y="325" font-family="monospace" font-size="10" fill="#ff9ff0">NET</text>
-    <rect x="940" y="295" width="95" height="26" fill="#1a1040" stroke="#3dff8c" stroke-width="1.5" opacity="0.95"/>
+    <rect x="940" y="295" width="95" height="26" fill="#0b1511" stroke="#3dff8c" stroke-width="1.5" opacity="0.95"/>
     <text x="948" y="313" font-family="monospace" font-size="11" fill="#3dff8c">HACK://</text>
   </g>
 
   <!-- Foreground silhouette: rooftops + pipes (very dark) -->
-  <g fill="#080512">
+  <g fill="#030605">
     <path d="M0 360 L0 320 L40 320 L40 300 L120 300 L120 325 L180 325 L180 310 L260 310 L260 330 L320 330 L320 300 L400 300 L400 322 L470 322 L470 315 L550 315 L550 335 L640 335 L640 305 L720 305 L720 325 L800 325 L800 312 L880 312 L880 330 L950 330 L950 305 L1040 305 L1040 322 L1120 322 L1120 312 L1200 312 L1200 328 L1280 328 L1280 360 Z"/>
-    <rect x="60" y="280" width="12" height="40" fill="#0d0820"/>
-    <rect x="330" y="270" width="14" height="30" fill="#0d0820"/>
-    <rect x="660" y="275" width="10" height="30" fill="#0d0820"/>
-    <rect x="1050" y="272" width="12" height="33" fill="#0d0820"/>
+    <rect x="60" y="280" width="12" height="40" fill="#050a08"/>
+    <rect x="330" y="270" width="14" height="30" fill="#050a08"/>
+    <rect x="660" y="275" width="10" height="30" fill="#050a08"/>
+    <rect x="1050" y="272" width="12" height="33" fill="#050a08"/>
   </g>
 
   <!-- Haze overlay -->
