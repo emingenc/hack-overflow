@@ -78,7 +78,7 @@ func _build_ui() -> void:
 	_panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 14)
+	vbox.add_theme_constant_override("separation", 12)
 	margin.add_child(vbox)
 
 	# Header row
@@ -87,7 +87,7 @@ func _build_ui() -> void:
 	vbox.add_child(header)
 
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 24)
+	_title_label.add_theme_font_size_override("font_size", 28)
 	_title_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title_label)
@@ -140,19 +140,19 @@ func _build_ui() -> void:
 	# [0,1], [lo,hi]) which BBCode would parse as tags and silently drop.
 	_desc_label.bbcode_enabled = false
 	_desc_label.scroll_active = true
-	_desc_label.custom_minimum_size = Vector2(0, 200)
+	_desc_label.custom_minimum_size = Vector2(0, 220)
 	_desc_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# CRITICAL: wrap the problem text or it clips past the panel edge on phones.
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_desc_label.add_theme_font_size_override("normal_font_size", 18)
+	_desc_label.add_theme_font_size_override("normal_font_size", 21)
 	_desc_label.add_theme_color_override("default_color", Color(0.85, 1.0, 0.7))
 	vbox.add_child(_desc_label)
 
 	# Options — wrapped in a scroll area so tall ORDER layouts don't push the
 	# panel (and the submit/exit buttons) below the fold on short screens.
 	var options_scroll := ScrollContainer.new()
-	options_scroll.custom_minimum_size = Vector2(0, 180)
+	options_scroll.custom_minimum_size = Vector2(0, 200)
 	options_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	options_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	vbox.add_child(options_scroll)
@@ -174,7 +174,7 @@ func _build_ui() -> void:
 	_feedback_label = Label.new()
 	_feedback_label.text = ""
 	_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_feedback_label.add_theme_font_size_override("font_size", 14)
+	_feedback_label.add_theme_font_size_override("font_size", 16)
 	vbox.add_child(_feedback_label)
 
 	# Button row
@@ -229,6 +229,17 @@ func _make_button_style(color: Color) -> StyleBoxFlat:
 func _clean_text(s: String) -> String:
 	return s.replace("`", "")
 
+## Record mastery on solve: 3 first-try, 2 with hint, 1 assisted.
+func _record_solved() -> void:
+	var stars := 3
+	if _assisted:
+		stars = 1
+	elif _show_hint:
+		stars = 2
+	var pid: String = str(puzzle.get("id", ""))
+	if pid != "":
+		GameManager.record_solve(pid, stars)
+
 func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 	puzzle = data
 	_level_index = level_index
@@ -246,6 +257,9 @@ func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 	_steps_correct = 0
 	_steps_total = 0
 	_order_placed = []
+	_update_egg_active = false
+	_update_egg_bar = null
+	_kill_button = null
 	_title_label.text = "> " + puzzle.title
 	_difficulty_label.text = puzzle.difficulty
 	_difficulty_label.add_theme_color_override("font_color",
@@ -267,14 +281,105 @@ func show_puzzle(data: Dictionary, level_index: int = 0) -> void:
 func _build_options() -> void:
 	for child in _options_box.get_children():
 		child.queue_free()
+	_submit_button.disabled = true
 	match _task_type:
 		"trace":
 			_build_trace_step()
 		"order":
 			_build_order()
+		"restart":
+			_build_restart()
+		"windows_update":
+			_build_windows_update()
 		_:
 			_build_mcq()
+
+## ── EASTER EGG: "have you tried turning it off and on again?" ────────
+func _build_restart() -> void:
+	# No answer options. The ONLY correct move is the REBOOT button.
+	_submit_button.text = "REBOOT SYSTEM"
+	_submit_button.disabled = false
+	_submit_button.pressed.connect(_on_reboot_pressed, CONNECT_ONE_SHOT)
+	_hint_button.disabled = true
+	_back_button.text = "ABANDON"
+	_feedback_label.text = "It's not a bug — it's a feature. Probably."
+
+func _on_reboot_pressed() -> void:
+	# Restart literally IS the solution: reload the level, preserve progress
+	# (GameManager already persisted mastery), and mark this puzzle solved.
+	_assisted = false
+	_last_correct = true
+	_record_solved()
+	_feedback_label.text = "✓ REBOOTING…\n\n…and it worked. Of course it worked."
+	_feedback_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	AudioManager.play("correct")
 	_submit_button.disabled = true
+	_back_button.text = "CONTINUE →"
+	_back_button.disabled = false
+
+## ── EASTER EGG: "Windows Update" (never finishes) ─────────────────────
+func _build_windows_update() -> void:
+	# A fake progress bar that crawls toward 99% and hangs forever.
+	var bar := ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = 100
+	bar.value = 0
+	bar.show_percentage = true
+	bar.custom_minimum_size = Vector2(0, 28)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_options_box.add_child(bar)
+	_update_egg_bar = bar
+	_update_egg_t = 0.0
+	_update_egg_active = true
+
+	# The real solve: a hidden "force stop" (Ctrl+C) button disguised as terminal text.
+	_submit_button.text = "DON'T TURN OFF YOUR PC"
+	_submit_button.disabled = true
+
+	# A subtle kill switch appears as a tiny terminal prompt button.
+	var kill := Button.new()
+	kill.text = "> _  (press to force-quit wuauserv.exe)"
+	kill.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	kill.custom_minimum_size = Vector2(0, 40)
+	kill.add_theme_font_size_override("font_size", 14)
+	kill.pressed.connect(_on_kill_update, CONNECT_ONE_SHOT)
+	_options_box.add_child(kill)
+	_kill_button = kill
+	_back_button.text = "EXIT TERMINAL"
+	_hint_button.disabled = true
+
+var _update_egg_bar: ProgressBar = null
+var _update_egg_t: float = 0.0
+var _update_egg_active: bool = false
+var _kill_button: Button = null
+
+func _process(delta: float) -> void:
+	# Drive the Windows Update fake progress bar toward an eternal 99%.
+	if _update_egg_active and _update_egg_bar:
+		_update_egg_t += delta
+		var v: float = minf(99.0, _update_egg_bar.value + delta * 6.0)
+		if v >= 99.0:
+			# Hang at 99%: occasionally tick to 99%, never 100%.
+			v = 99.0
+			_update_egg_active = false
+			_feedback_label.text = "Still working on updates…"
+		_update_egg_bar.value = v
+
+func _on_kill_update() -> void:
+	_assisted = false
+	_last_correct = true
+	_record_solved()
+	_update_egg_active = false
+	if _update_egg_bar:
+		_update_egg_bar.value = 100
+	_feedback_label.text = "✓ wuauserv.exe terminated.\n\nUpdate cancelled. Freedom."
+	_feedback_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	AudioManager.play("correct")
+	_submit_button.disabled = true
+	if _kill_button:
+		_kill_button.disabled = true
+	_back_button.text = "CONTINUE →"
+	_back_button.disabled = false
 
 func _build_mcq() -> void:
 	for i in range(puzzle.options.size()):
@@ -286,7 +391,7 @@ func _make_option_button(text: String, i: int) -> Button:
 	var btn := Button.new()
 	btn.text = "  [%s]  %s" % [String.chr(65 + i), text]
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	btn.custom_minimum_size = Vector2(0, 56)
+	btn.custom_minimum_size = Vector2(0, 44)
 	btn.add_theme_font_size_override("font_size", 18)
 	# No per-button style overrides — inherit the global theme's Kenney 9-slice
 	# buttons for a consistent professional look.
@@ -436,10 +541,13 @@ func _on_submit_mcq() -> void:
 	_answered = true
 	_attempts += 1
 	GameManager.puzzles_attempted += 1
+	if str(puzzle.get("id", "")) != "":
+		GameManager.record_attempt(str(puzzle["id"]))
 	_attempts_label.text = "ATTEMPT %d" % _attempts
 	var correct: bool = (_selected == int(puzzle.correct_index))
 	_last_correct = correct
 	if correct:
+		_record_solved()
 		_feedback_label.text = "✓ ACCESS GRANTED\n\n" + puzzle.explanation
 		_feedback_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 		AudioManager.play("correct")
@@ -487,6 +595,7 @@ func _on_submit_trace() -> void:
 		GameManager.puzzles_attempted += 1
 		var correct: bool = (_selected == int(syn.get("correct_index", -1)))
 		_last_correct = true  # the task's core steps were all solved; synthesis is graded but not gating
+		_record_solved()
 		if correct:
 			_feedback_label.text = "✓ Correct — " + syn.get("explanation", "")
 			_feedback_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
@@ -520,6 +629,7 @@ func _on_submit_trace() -> void:
 		# If this was the final step and there's no synthesis, the task is done.
 		if _step_index >= steps.size() and syn.is_empty():
 			_last_correct = true
+			_record_solved()
 			_submit_button.disabled = true
 			_hint_button.disabled = true
 			_back_button.text = "CONTINUE →"
@@ -563,6 +673,7 @@ func _on_submit_order() -> void:
 			_slot_buttons[s].add_theme_stylebox_override("normal", _make_button_style(Color(0.1, 0.2, 0.15)))
 	if all_correct:
 		_last_correct = true
+		_record_solved()
 		_feedback_label.text = "✓ ACCESS GRANTED — sequence correct."
 		_feedback_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 		AudioManager.play("correct")
@@ -611,6 +722,7 @@ func _drain_integrity(amount: float) -> bool:
 func _reveal_assisted() -> void:
 	_assisted = true
 	_last_correct = true
+	_record_solved()
 	# Build a worked explanation: prefer a top-level explanation; for trace
 	# tasks, show the current step's explanation (the moment they got stuck).
 	var expl: String = str(puzzle.get("explanation", ""))

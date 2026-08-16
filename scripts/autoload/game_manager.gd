@@ -23,6 +23,26 @@ var chips_total: Array[int] = [0, 0, 0]
 var puzzles_solved: Array[bool] = [false, false, false]
 var puzzles_attempted: int = 0
 
+## Blind-75 mastery tracking, keyed by puzzle id.
+## mastery: 3 = first-try, 2 = with hint, 1 = assisted (integrity exhaustion),
+## 0 = not yet solved. Attempts stored for review/spaced-repetition.
+var puzzle_mastery: Dictionary = {}      # id -> int (0..3)
+var puzzle_attempts: Dictionary = {}     # id -> int
+## Ordered list of categories (NeetCode-style route). Order matters.
+const CATEGORIES: Array[String] = [
+	"Arrays & Hashing",
+	"Stack",
+	"Binary Search",
+	"Linked List",
+	"Trees",
+	"Sliding Window",
+	"Dynamic Programming",
+	"Intervals",
+	"Graphs",
+	"Design",
+	"Easter Egg",
+]
+
 func _ready() -> void:
 	randomize()
 	load_game()
@@ -35,6 +55,7 @@ var current_level: int = 0
 const PUZZLES: Array[Dictionary] = [
 	{
 		"id": "two_sum",
+		"category": "Arrays & Hashing",
 		"title": "Two Sum",
 		"difficulty": "EASY",
 		"description": "Given an array of integers `nums` and an integer `target`, return indices of the two numbers that add up to `target`.\n\nWhich approach gives the best time complexity?",
@@ -50,6 +71,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "valid_parentheses",
+		"category": "Stack",
 		"title": "Valid Parentheses",
 		"difficulty": "EASY",
 		"description": "Given a string s containing just the characters ( ) { } [ ], determine if the input string is valid: open brackets must be closed by the same type and in the correct order.\n\nWhich data structure is the classic fit?",
@@ -65,6 +87,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "max_subarray",
+		"category": "Dynamic Programming",
 		"title": "Maximum Subarray",
 		"difficulty": "MEDIUM",
 		"description": "Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.\n\nWhat is the best time complexity achievable?",
@@ -80,6 +103,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "reverse_linked_list",
+		"category": "Linked List",
 		"title": "Reverse Linked List",
 		"difficulty": "EASY",
 		"description": "Given the head of a singly linked list, reverse the list and return the new head.\n\nWhat is the correct iterative pattern?",
@@ -95,6 +119,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "binary_search",
+		"category": "Binary Search",
 		"title": "Binary Search",
 		"difficulty": "EASY",
 		"description": "Given a sorted array of n elements and a target value, find the index of the target.\n\nWhat invariant keeps binary search correct?",
@@ -110,6 +135,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "merge_intervals",
+		"category": "Intervals",
 		"title": "Merge Intervals",
 		"difficulty": "MEDIUM",
 		"description": "Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input.\n\nWhat is the first step that makes this tractable?",
@@ -125,6 +151,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "invert_binary_tree",
+		"category": "Trees",
 		"title": "Invert Binary Tree",
 		"difficulty": "EASY",
 		"description": "Given the root of a binary tree, invert the tree (swap every left and right child) and return its root.\n\nWhich traversal pattern is used in the classic recursive solution?",
@@ -140,6 +167,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "top_k_frequent",
+		"category": "Arrays & Hashing",
 		"title": "Top K Frequent Elements",
 		"difficulty": "MEDIUM",
 		"description": "Given an integer array nums and an integer k, return the k most frequent elements.\n\nWhat is the best-complexity approach?",
@@ -155,6 +183,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "lru_cache",
+		"category": "Design",
 		"title": "LRU Cache",
 		"difficulty": "MEDIUM",
 		"description": "Design a data structure that follows the LRU (Least Recently Used) cache constraints: get and put must run in O(1) average time.\n\nWhich two data structures combined give O(1) get and put?",
@@ -170,6 +199,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "coin_change",
+		"category": "Dynamic Programming",
 		"title": "Coin Change",
 		"difficulty": "MEDIUM",
 		"description": "You are given coins of different denominations and a total amount. Return the fewest number of coins needed to make up that amount.\n\nWhich algorithmic paradigm solves this optimally?",
@@ -185,6 +215,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "validate_bst",
+		"category": "Trees",
 		"title": "Validate Binary Search Tree",
 		"difficulty": "MEDIUM",
 		"description": "Given the root of a binary tree, determine if it is a valid BST (left subtree values < node < right subtree values, for every node).\n\nWhich check is sufficient?",
@@ -200,6 +231,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "longest_substring",
+		"category": "Sliding Window",
 		"title": "Longest Substring Without Repeating Characters",
 		"difficulty": "MEDIUM",
 		"description": "Given a string s, find the length of the longest substring without repeating characters.\n\nWhat is the sliding-window pattern?",
@@ -215,6 +247,7 @@ const PUZZLES: Array[Dictionary] = [
 	},
 	{
 		"id": "course_schedule",
+		"category": "Graphs",
 		"title": "Course Schedule",
 		"difficulty": "MEDIUM",
 		"description": "There are numCourses courses you have to take, labeled 0 to numCourses - 1. Given prerequisites pairs, decide if you can finish all courses.\n\nWhat does this reduce to?",
@@ -232,6 +265,7 @@ const PUZZLES: Array[Dictionary] = [
 	{
 		"type": "trace",
 		"id": "two_sum_trace",
+		"category": "Arrays & Hashing",
 		"title": "Two Sum — TRACE",
 		"difficulty": "EASY",
 		"description": "Run this algorithm step by step:\nfor each i: if target - nums[i] is in seen, return [seen[target - nums[i]], i]; else store seen[nums[i]] = i.\n\nInput: nums = [2, 7, 11, 15], target = 9.",
@@ -246,6 +280,7 @@ const PUZZLES: Array[Dictionary] = [
 	{
 		"type": "trace",
 		"id": "valid_paren_trace",
+		"category": "Stack",
 		"title": "Valid Parentheses — TRACE",
 		"difficulty": "EASY",
 		"description": "Trace the stack algorithm on the string s = \"()[]{}\".\nFor each char: if it's an opening bracket, push it; if closing, pop and check it matches.",
@@ -261,6 +296,7 @@ const PUZZLES: Array[Dictionary] = [
 	{
 		"type": "order",
 		"id": "binary_search_order",
+		"category": "Binary Search",
 		"title": "Binary Search — RECONSTRUCT",
 		"difficulty": "EASY",
 		"description": "The firewall scrambled the binary-search loop. Rebuild the correct order.",
@@ -286,6 +322,7 @@ const PUZZLES: Array[Dictionary] = [
 	{
 		"type": "order",
 		"id": "reverse_list_order",
+		"category": "Linked List",
 		"title": "Reverse Linked List — RECONSTRUCT",
 		"difficulty": "MEDIUM",
 		"description": "Rebuild the iterative linked-list reversal using prev / curr / next pointers.",
@@ -308,14 +345,49 @@ const PUZZLES: Array[Dictionary] = [
 		],
 		"hint": "You must save the next node before you change where curr points.",
 	},
+	# ── EASTER EGGS: programmer-humor tasks ─────────────────────────────
+	{
+		"type": "restart",
+		"id": "easter_restart",
+		"category": "Easter Egg",
+		"title": "Have you tried turning it off and on again?",
+		"difficulty": "EASY",
+		"description": "SYSTEM FAULT\n\n*** KERNEL PANIC ***\n\nFATAL ERROR: SEGFAULT in module firewall_ctl\nAddress 0xDEADBEEF · core dumped\n\nNo algorithm can save you now.",
+		"hint": "There is no code answer here. Think like IT support.",
+	},
+	{
+		"type": "windows_update",
+		"id": "easter_windows_update",
+		"category": "Easter Egg",
+		"title": "Windows Update",
+		"difficulty": "EASY",
+		"description": "Installing updates… 1 of 1,337\n\nPlease do not turn off your computer.",
+		"hint": "It will never finish on its own. Find the way to stop it.",
+	},
 ]
 
 ## Choose a puzzle for a level. Difficulty-filtered, no repeat within a session.
+## If pending_category is set, draw from that category instead (route-map launch).
 var session_seen: Array[String] = []
+var pending_category: String = ""
 
 func get_puzzle_for_level(level_index: int) -> Dictionary:
 	var pool := PUZZLES
 	var filtered: Array[Dictionary] = []
+	# Category-pinned mode: the route map launched a specific Blind-75 category.
+	if pending_category != "":
+		var cat := pending_category
+		pending_category = ""
+		for p in pool:
+			if p.get("category", "") == cat and not session_seen.has(p["id"]):
+				filtered.append(p)
+		if filtered.is_empty():
+			for p in pool:
+				if p.get("category", "") == cat:
+					filtered.append(p)
+		var c: Dictionary = filtered[randi_range(0, filtered.size() - 1)]
+		session_seen.append(c["id"])
+		return c
 	for p in pool:
 		var diff: String = p.get("difficulty", "EASY")
 		var ok := true
@@ -352,6 +424,11 @@ func save_game() -> void:
 		cfg.set_value("progress", "best_time_%d" % i, best_times[i])
 		cfg.set_value("progress", "chips_%d" % i, chips_collected[i])
 		cfg.set_value("progress", "solved_%d" % i, puzzles_solved[i])
+	# Persist per-puzzle mastery + attempts (Blind-75 progress).
+	for pid in puzzle_mastery.keys():
+		cfg.set_value("mastery", pid, puzzle_mastery[pid])
+	for pid in puzzle_attempts.keys():
+		cfg.set_value("attempts", pid, puzzle_attempts[pid])
 	cfg.save("user://save.cfg")
 
 func load_game() -> void:
@@ -363,6 +440,58 @@ func load_game() -> void:
 		best_times[i] = cfg.get_value("progress", "best_time_%d" % i, -1.0)
 		chips_collected[i] = cfg.get_value("progress", "chips_%d" % i, 0)
 		puzzles_solved[i] = cfg.get_value("progress", "solved_%d" % i, false)
+	# Load per-puzzle mastery + attempts.
+	for p in PUZZLES:
+		var pid: String = p["id"]
+		if cfg.has_section_key("mastery", pid):
+			puzzle_mastery[pid] = cfg.get_value("mastery", pid, 0)
+		if cfg.has_section_key("attempts", pid):
+			puzzle_attempts[pid] = cfg.get_value("attempts", pid, 0)
+
+## Record a solve. stars: 3 first-try, 2 with hint, 1 assisted. Keep best.
+func record_solve(pid: String, stars: int) -> void:
+	if not puzzle_mastery.has(pid) or int(puzzle_mastery[pid]) < stars:
+		puzzle_mastery[pid] = stars
+	save_game()
+
+## Increment the attempt counter for a puzzle id.
+func record_attempt(pid: String) -> void:
+	puzzle_attempts[pid] = int(puzzle_attempts.get(pid, 0)) + 1
+	save_game()
+
+## Mastery for a puzzle id (0..3).
+func mastery_for(pid: String) -> int:
+	return int(puzzle_mastery.get(pid, 0))
+
+## Attempts for a puzzle id.
+func attempts_for(pid: String) -> int:
+	return int(puzzle_attempts.get(pid, 0))
+
+## All puzzle ids belonging to a category (in bank order).
+func puzzles_in_category(cat: String) -> Array[String]:
+	var ids: Array[String] = []
+	for p in PUZZLES:
+		if p.get("category", "") == cat:
+			ids.append(p["id"])
+	return ids
+
+## A category is "available" if the previous category is fully solved, or it's
+## the first. Returns [locked_count, solved_count, total_count].
+func category_progress(cat: String) -> Array[int]:
+	var ids := puzzles_in_category(cat)
+	var solved := 0
+	for pid in ids:
+		if mastery_for(pid) > 0:
+			solved += 1
+	return [ids.size() - solved, solved, ids.size()]
+
+func is_category_available(cat: String) -> bool:
+	var idx := CATEGORIES.find(cat)
+	if idx <= 0:
+		return true
+	var prev := CATEGORIES[idx - 1]
+	var prog := category_progress(prev)
+	return prog[2] > 0 and prog[1] >= prog[2]  # prev fully solved
 
 func is_level_unlocked(level_index: int) -> bool:
 	return unlocked_levels[level_index]
