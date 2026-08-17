@@ -458,8 +458,8 @@ func _build_order() -> void:
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.custom_minimum_size = Vector2(0, 52)
 		btn.add_theme_font_size_override("font_size", 16)
-		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.08, 0.1, 0.2)))
-		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.12, 0.16, 0.3)))
+		btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.05, 0.12, 0.08)))
+		btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.08, 0.18, 0.12)))
 		btn.pressed.connect(_on_order_slot_pressed.bind(s))
 		_options_box.add_child(btn)
 		_slot_buttons.append(btn)
@@ -471,8 +471,8 @@ func _make_order_step_button(text: String) -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 52)
 	btn.add_theme_font_size_override("font_size", 15)
-	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.12, 0.16, 0.35)))
-	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.16, 0.22, 0.45)))
+	btn.add_theme_stylebox_override("normal", _make_button_style(Color(0.06, 0.18, 0.10)))
+	btn.add_theme_stylebox_override("hover", _make_button_style(Color(0.10, 0.28, 0.16)))
 	return btn
 
 func _on_order_pool_pressed(step_idx: int) -> void:

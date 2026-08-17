@@ -109,7 +109,7 @@ func _build_parallax() -> void:
 	sky.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	sky.set_anchors_preset(Control.PRESET_FULL_RECT)
 	sky.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	sky.modulate = Color(0.35, 0.5, 0.4, 0.55)  # dim green cast so the rain reads through
+	sky.modulate = Color(0.5, 0.7, 0.55, 0.7)  # brighter green cast so the sky reads
 	sky.name = "ParallaxSky"
 	add_child(sky)
 
@@ -119,7 +119,7 @@ func _build_parallax() -> void:
 	grid.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	grid.set_anchors_preset(Control.PRESET_FULL_RECT)
 	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	grid.modulate = Color(0.25, 0.55, 0.35, 0.22)
+	grid.modulate = Color(0.3, 0.65, 0.45, 0.4)
 	grid.name = "ParallaxGrid"
 	add_child(grid)
 
@@ -259,7 +259,7 @@ func _camera_setup(target: Node2D) -> void:
 	cam.limit_left = 0
 	cam.limit_right = _map_pixel_width()
 	cam.limit_top = -TILE_SIZE * 4
-	cam.limit_bottom = _map_pixel_height() + TILE_SIZE * 4
+	cam.limit_bottom = _map_pixel_height() + TILE_SIZE
 	add_child(cam)  # sibling of the player → real deadzone is possible
 	cam.position = target.position
 	cam.make_current()
@@ -317,10 +317,11 @@ func _spawn_hazard(cell: Vector2i) -> void:
 	col.shape = shape
 	hazard.add_child(col)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/obj/enemy.png")  # Kenney enemy sprite
+	spr.texture = preload("res://assets/warped/enemy/turret-1.png")
+	spr.modulate = Color(1.0, 0.35, 0.3)  # red tint = electric hazard
 	spr.name = "Sprite2D"
 	spr.position = Vector2(0, 6)
-	spr.scale = Vector2(0.9, 0.9)
+	spr.scale = Vector2(1.0, 1.0)
 	hazard.add_child(spr)
 	add_child(hazard)
 	hazard.body_entered.connect(func(body: Node2D) -> void:
@@ -332,9 +333,7 @@ func _spawn_drone(cell: Vector2i) -> void:
 	drone.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	drone.patrol_distance = TILE_SIZE * 2.0
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/obj/enemy.png")  # Kenney flying enemy
 	spr.name = "Sprite2D"
-	spr.scale = Vector2(1.1, 1.1)
 	drone.add_child(spr)
 	drone.add_child(_make_collision_circle(10.0))
 	add_child(drone)
@@ -343,9 +342,7 @@ func _spawn_turret(cell: Vector2i) -> void:
 	var turret := FirewallTurret.new()
 	turret.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/obj/enemy2.png")  # Kenney turret sprite
 	spr.name = "Sprite2D"
-	spr.scale = Vector2(1.1, 1.1)
 	turret.add_child(spr)
 	turret.add_child(_make_collision_circle(12.0))
 	add_child(turret)
@@ -354,9 +351,10 @@ func _spawn_chip(cell: Vector2i) -> void:
 	var chip := DataChip.new()
 	chip.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/obj/chip.png")  # Kenney gem/pickup
+	spr.texture = preload("res://assets/warped/props/monitor-face-1.png")  # data chip
+	spr.modulate = Color(0.5, 1.0, 0.6)  # green glow
 	spr.name = "Sprite2D"
-	spr.scale = Vector2(0.9, 0.9)
+	spr.scale = Vector2(1.0, 1.0)
 	chip.add_child(spr)
 	chip.add_child(_make_collision_circle(9.0))
 	add_child(chip)
@@ -368,9 +366,9 @@ func _spawn_firewall(cell: Vector2i) -> void:
 	firewall.terminal_name = "FIREWALL_" + str(level_index + 1).pad_zeros(2)
 	firewall.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE)
 	var spr := Sprite2D.new()
-	spr.texture = preload("res://assets/obj/terminal.png")  # Kenney screen/terminal
+	spr.texture = preload("res://assets/warped/props/control-box-1.png")  # control console
 	spr.name = "Sprite2D"
-	spr.scale = Vector2(1.5, 1.5)
+	spr.scale = Vector2(1.3, 1.3)
 	firewall.add_child(spr)
 	var prompt := Label.new()
 	prompt.text = "PRESS E TO HACK"
@@ -395,13 +393,13 @@ func _spawn_exit(cell: Vector2i) -> void:
 	exit_portal.add_child(col)
 	# Distinct exit visual: pulsing portal sprite + inner glow, not a terminal.
 	var ring := Sprite2D.new()
-	ring.texture = preload("res://assets/obj/portal.png")  # Kenney portal item
+	ring.texture = preload("res://assets/warped/props/monitor-face-1.png")  # portal node
 	ring.modulate = Color(0.5, 1.0, 0.7)
-	ring.scale = Vector2(1.4, 1.4)
+	ring.scale = Vector2(1.6, 1.6)
 	ring.name = "Sprite2D"
 	exit_portal.add_child(ring)
 	var core := Sprite2D.new()
-	core.texture = preload("res://assets/sprites/chip.svg")
+	core.texture = preload("res://assets/warped/props/monitor-face-1.png")
 	core.scale = Vector2(1.2, 1.2)
 	core.modulate = Color(0.4, 1.0, 0.9)
 	core.position = Vector2(0, -6)
