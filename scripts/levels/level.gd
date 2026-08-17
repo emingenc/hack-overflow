@@ -11,6 +11,8 @@ extends Node2D
 ##   F  = firewall terminal (checkpoint / puzzle)
 ##   P  = player spawn
 ##   E  = exit portal
+##   O  = overclock powerup (bullet-time + speed)
+##   S  = shield powerup (temporary invincibility)
 
 @export var level_index: int = 0
 @export var level_name: String = "SECTOR_00"
@@ -178,6 +180,10 @@ func _build_from_map() -> void:
 					_spawn_player(cell)
 				"E":
 					_spawn_exit(cell)
+				"O":
+					_spawn_powerup(cell, PowerUp.Type.OVERCLOCK)
+				"S":
+					_spawn_powerup(cell, PowerUp.Type.SHIELD)
 
 	# Boundary walls: stop the player walking off the left/right map edges
 	# (the maps only tile the floor, so the sides are open voids).
@@ -359,6 +365,22 @@ func _spawn_chip(cell: Vector2i) -> void:
 	chip.add_child(_make_collision_circle(9.0))
 	add_child(chip)
 	chips_total += 1
+
+func _spawn_powerup(cell: Vector2i, type: int) -> void:
+	var p := PowerUp.new()
+	p.type = type
+	p.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
+	var spr := Sprite2D.new()
+	if type == PowerUp.Type.OVERCLOCK:
+		spr.texture = preload("res://assets/warped/props/monitor-face-1.png")
+		spr.modulate = Color(0.4, 1.0, 1.0)  # cyan = overclock
+	else:
+		spr.texture = preload("res://assets/warped/props/control-box-1.png")
+		spr.modulate = Color(1.0, 0.8, 0.3)  # amber = shield
+	spr.name = "Sprite2D"
+	p.add_child(spr)
+	p.add_child(_make_collision_circle(11.0))
+	add_child(p)
 
 func _spawn_firewall(cell: Vector2i) -> void:
 	firewall = FirewallTerminal.new()

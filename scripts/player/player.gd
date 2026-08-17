@@ -17,7 +17,7 @@ const JUMP_CUT_MULTIPLIER: float = 0.45
 const MAX_FALL_SPEED: float = 900.0
 const COYOTE_TIME: float = 0.12
 const JUMP_BUFFER_TIME: float = 0.12
-const BASE_SCALE: Vector2 = Vector2(0.75, 0.75)  # scene Sprite2D base scale
+const BASE_SCALE: Vector2 = Vector2(0.5, 0.5)  # scene Sprite2D base scale (Warped City char)
 const DASH_SPEED: float = 520.0
 const DASH_TIME: float = 0.16
 const DASH_COOLDOWN: float = 0.45
@@ -39,12 +39,23 @@ var facing: int = 1  # 1 = right, -1 = left
 var gravity: float = 1500.0
 var fall_speed_at_impact: float = 0.0
 var _squash_tween: Tween = null
+# Powerup state
+var _speed_multiplier: float = 1.0
+var _overclock_timer: float = 0.0
+var _invincible_timer: float = 0.0
 
 func _ready() -> void:
 	dash_trail.emitting = false
 
 func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
+	# Powerup timers
+	if _overclock_timer > 0.0:
+		_overclock_timer -= delta
+		if _overclock_timer <= 0.0:
+			Engine.time_scale = 1.0
+			_speed_multiplier = 1.0
+	_invincible_timer = maxf(0.0, _invincible_timer - delta)
 
 	# Jump buffer is polled first so a dash can't eat the input; it freezes during
 	# the dash so buffered dash→jump chains still fire when the dash ends.
@@ -77,7 +88,7 @@ func _physics_process(delta: float) -> void:
 
 	# ── Horizontal movement ───────────────────────────────────────
 	var move_input := Input.get_axis("move_left", "move_right")
-	var target_speed := move_input * SPEED
+	var target_speed := move_input * SPEED * _speed_multiplier
 	if move_input != 0.0:
 		facing = 1 if move_input > 0.0 else -1
 		if is_on_floor():
@@ -149,6 +160,7 @@ func _start_dash() -> void:
 
 func _update_animation() -> void:
 	sprite.flip_h = facing < 0
+	sprite.modulate = Color(0.55, 0.85, 1.0) if _invincible_timer > 0.0 else Color(1, 1, 1)
 	if is_dashing:
 		anim.play("jump")  # dash uses the stretched mid-air pose (no separate sprite)
 		return
@@ -198,7 +210,21 @@ func _add_trauma(amount: float) -> void:
 	if lvl:
 		lvl.add_trauma(amount)
 
+## Apply a collected powerup (PowerUp.Type). OVERCLOCK = bullet-time + speed;
+## SHIELD = temporary firewall invincibility.
+func apply_powerup(type: int) -> void:
+	if type == PowerUp.Type.OVERCLOCK:
+		_overclock_timer = 4.0
+		_speed_multiplier = 2.0
+		Engine.time_scale = 0.35
+		AudioManager.play("dash")
+	elif type == PowerUp.Type.SHIELD:
+		_invincible_timer = 5.0
+		AudioManager.play("chip")
+
 func die() -> void:
+	if _invincible_timer > 0.0:
+		return  # firewall shield absorbs the hit
 	AudioManager.play("death")
 	Hitstop.freeze(0.08)
 	_add_trauma(0.5)

@@ -1,42 +1,62 @@
 extends CanvasLayer
 ## On-screen virtual controls for mobile/web touch.
-## Bottom-left d-pad; bottom-right action row [HACK][DASH][JUMP].
-## Sizes scale with viewport so hit targets stay >= 44px on real phones.
+## Movement: VirtualJoystick (MarcoFazioRandom/Virtual-Joystick-Godot, MIT) —
+##   analog left/right with dead zone + multitouch. Don't reinvent the wheel.
+## Actions: jump / dash / hack buttons (the joystick library only does movement).
 ## Auto-hides while the puzzle UI is open.
 
+var _joystick: Control = null
 var _buttons: Array[TouchButton] = []
 var _visible: bool = true
 
 func _ready() -> void:
 	layer = 50
-	if DisplayServer.is_touchscreen_available():
+	if _is_touch_device():
 		_build_ui()
 	get_viewport().size_changed.connect(func() -> void:
-		if DisplayServer.is_touchscreen_available() and _buttons.is_empty():
+		if _is_touch_device() and _joystick == null:
 			_build_ui()
 		else:
 			_reposition()
 	)
+
+## Show virtual controls only on touch-primary devices (mobile/tablet).
+## Desktop PCs — even touch-capable laptops or browsers that report a
+## touchscreen — should not get on-screen buttons.
+func _is_touch_device() -> bool:
+	var os_name := OS.get_name()
+	if os_name == "Android" or os_name == "iOS":
+		return true
+	if os_name == "Web":
+		# pointer:coarse = touch (mobile/tablet); pointer:fine = mouse (PC).
+		if ClassDB.class_exists("JavaScriptBridge"):
+			return bool(JavaScriptBridge.eval("window.matchMedia('(pointer: coarse)').matches", true))
+		return DisplayServer.is_touchscreen_available()
+	return false
 
 func _build_ui() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	var s := _scale()
 	var pad := 12.0 * s
 
-	# D-pad (bottom-left): cyan
-	var left := _make_button("res://assets/sprites/ui_icon_left.svg", "move_left", Color(0.1, 1.0, 0.3), Color(0.5, 1.0, 0.5))
-	left.size = Vector2(96 * s, 96 * s)
-	left.position = Vector2(pad, vp.y - (96 * s) - pad)
-	add_child(left)
-	_buttons.append(left)
+	# ── Movement: the battle-tested VirtualJoystick (left side) ──────────
+	_joystick = preload("res://addons/virtual_joystick/virtual_joystick_scene.tscn").instantiate()
+	_joystick.use_input_actions = true
+	_joystick.action_left = "move_left"
+	_joystick.action_right = "move_right"
+	_joystick.action_up = ""     # platformer — no vertical movement
+	_joystick.action_down = ""
+	_joystick.joystick_mode = _joystick.Joystick_mode.FIXED
+	_joystick.visibility_mode = _joystick.Visibility_mode.ALWAYS
+	# Scale the whole joystick to fit the phone's bottom-left corner.
+	_joystick.scale = Vector2(s, s)
+	_joystick.position = Vector2(pad, vp.y - 220.0 * s - pad)
+	# Anchor the joystick area to bottom-left.
+	_joystick.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_joystick.position = Vector2(pad, -220.0 * s - pad)
+	add_child(_joystick)
 
-	var right := _make_button("res://assets/sprites/ui_icon_right.svg", "move_right", Color(0.1, 1.0, 0.3), Color(0.5, 1.0, 0.5))
-	right.size = Vector2(96 * s, 96 * s)
-	right.position = Vector2(pad + 104 * s, vp.y - (96 * s) - pad)
-	add_child(right)
-	_buttons.append(right)
-
-	# Action row (bottom-right): HACK (small, left), DASH (mid), JUMP (big, rightmost)
+	# ── Action row (bottom-right): HACK (small, left), DASH (mid), JUMP (big) ──
 	var btn := 86.0 * s
 	var jump := _make_button("res://assets/sprites/ui_icon_jump.svg", "jump", Color(0.2, 0.9, 0.55), Color(0.6, 1.0, 0.8))
 	jump.size = Vector2(btn, btn)
@@ -74,23 +94,28 @@ func _reposition() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	var s := _scale()
 	var pad := 12.0 * s
-	if _buttons.size() < 5:
+	if _joystick:
+		_joystick.scale = Vector2(s, s)
+		_joystick.position = Vector2(pad, -220.0 * s - pad)
+	if _buttons.size() < 3:
 		return
-	_buttons[0].position = Vector2(pad, vp.y - (96 * s) - pad)
-	_buttons[1].position = Vector2(pad + 104 * s, vp.y - (96 * s) - pad)
 	var btn := 86.0 * s
-	_buttons[2].position = Vector2(vp.x - btn - pad, vp.y - btn - pad)
-	_buttons[3].position = Vector2(vp.x - btn - pad - btn * 0.78 - 10 * s, vp.y - btn - pad)
-	_buttons[4].position = Vector2(vp.x - btn - pad - btn * 0.78 - 10 * s - btn * 0.78 - 10 * s, vp.y - btn - pad)
+	_buttons[0].position = Vector2(vp.x - btn - pad, vp.y - btn - pad)
+	_buttons[1].position = Vector2(vp.x - btn - pad - btn * 0.78 - 10 * s, vp.y - btn - pad)
+	_buttons[2].position = Vector2(vp.x - btn - pad - btn * 0.78 - 10 * s - btn * 0.78 - 10 * s, vp.y - btn - pad)
 
 func hide_controls() -> void:
 	_visible = false
+	if _joystick:
+		_joystick.visible = false
 	for b in _buttons:
 		b.visible = false
 		b.release_action()
 
 func show_controls() -> void:
 	_visible = true
+	if _joystick:
+		_joystick.visible = true
 	for b in _buttons:
 		b.visible = true
 
