@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1786896453|1673954';
+const CACHE_VERSION = '1786994853|1670129';
 /** @type {string} */
 const CACHE_PREFIX = 'HACK://OVERFLOW-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
@@ -122,27 +122,15 @@ self.addEventListener(
 					}
 				}
 				let cached = await cache.match(event.request);
-				// Network-first for the game payload (pck/wasm) so a new deploy is
-				// always picked up; cache is only a fallback when offline.
-				if (cached != null && CACHEABLE_FILES.indexOf(local) === -1) {
+				if (cached != null) {
 					if (ENSURE_CROSSORIGIN_ISOLATION_HEADERS) {
 						cached = ensureCrossOriginIsolationHeaders(cached);
 					}
 					return cached;
 				}
-				// Try network; fall back to cache on failure.
-				try {
-					const response = await fetchAndCache(event, cache, isCacheable);
-					return response;
-				} catch (e) {
-					if (cached != null) {
-						if (ENSURE_CROSSORIGIN_ISOLATION_HEADERS) {
-							cached = ensureCrossOriginIsolationHeaders(cached);
-						}
-						return cached;
-					}
-					throw e;
-				}
+				// Try network if don't have it in cache.
+				const response = await fetchAndCache(event, cache, isCacheable);
+				return response;
 			})());
 		} else if (ENSURE_CROSSORIGIN_ISOLATION_HEADERS) {
 			event.respondWith((async () => {
