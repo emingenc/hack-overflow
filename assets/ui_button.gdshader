@@ -18,8 +18,7 @@ void fragment() {
 		// Outside the button: faint outer glow only
 		float outer_glow = smoothstep(radius + 0.18, radius, dist) * 0.35;
 		COLOR = vec4(glow_color.rgb, outer_glow);
-		return;
-	}
+	} else {
 
 	// Radial gradient: brighter at top-left (light source), darker at bottom-right
 	float light = 1.0 - (dist / radius) * 0.55;
@@ -42,4 +41,5 @@ void fragment() {
 	sphere *= 1.0 - smoothstep(0.42, 0.50, dist) * 0.25;
 
 	COLOR = vec4(sphere, disc);
+	}
 }

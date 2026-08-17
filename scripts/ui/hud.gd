@@ -15,7 +15,15 @@ func _ready() -> void:
 	bar.position = Vector2(0, 0)
 	bar.custom_minimum_size = Vector2(0, 44)
 	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	bar.modulate = Color(0.03, 0.08, 0.05, 0.85)
+	# Tint the panel background, NOT the node modulate — modulating the bar
+	# multiplies every child label into near-black and blanks the HUD.
+	var bar_style := StyleBoxFlat.new()
+	bar_style.bg_color = Color(0.03, 0.09, 0.05, 0.9)
+	bar_style.border_color = Color(0.0, 1.0, 0.25, 0.35)
+	bar_style.set_border_width_all(1)
+	bar_style.content_margin_top = 5
+	bar_style.content_margin_bottom = 5
+	bar.add_theme_stylebox_override("panel", bar_style)
 	add_child(bar)
 
 	var hbox := HBoxContainer.new()
@@ -25,25 +33,27 @@ func _ready() -> void:
 
 	_name_label = Label.new()
 	_name_label.text = "SECTOR: " + level_name
-	_name_label.add_theme_font_size_override("font_size", 15)
+	_name_label.add_theme_font_size_override("font_size", 18)
 	_name_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	hbox.add_child(_name_label)
 
 	_chips_label = Label.new()
-	_chips_label.add_theme_font_size_override("font_size", 15)
+	_chips_label.add_theme_font_size_override("font_size", 18)
 	hbox.add_child(_chips_label)
 
 	_time_label = Label.new()
-	_time_label.add_theme_font_size_override("font_size", 15)
+	_time_label.add_theme_font_size_override("font_size", 18)
 	hbox.add_child(_time_label)
 
 	# Controls hint (bottom)
 	var hint := Label.new()
 	hint.text = "A/D or DPAD move · W/SPACE or A jump (double!) · S or X dash · E or B interact"
 	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	hint.position.y -= 4
+	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint.offset_top = -32
+	hint.offset_bottom = -10
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 12)
+	hint.add_theme_font_size_override("font_size", 13)
 	hint.add_theme_color_override("font_color", Color(0.45, 0.75, 0.5, 0.7))
 	add_child(hint)
 
