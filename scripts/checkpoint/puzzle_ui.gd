@@ -76,6 +76,7 @@ func _build_ui() -> void:
 	margin.add_theme_constant_override("margin_top", 24)
 	margin.add_theme_constant_override("margin_bottom", 24)
 	_panel.add_child(margin)
+	_add_corner_brackets(_panel)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 12)
@@ -205,14 +206,25 @@ func _build_ui() -> void:
 	_submit_button.add_theme_stylebox_override("normal", _make_button_style(Color(0.4, 1.0, 0.6)))
 	btn_row.add_child(_submit_button)
 
+## Terminal-frame corner brackets (┌ ┐ └ ┘) pinned to the panel's corners.
+func _add_corner_brackets(parent: Control) -> void:
+	for spec in [[Control.PRESET_TOP_LEFT, "┌"], [Control.PRESET_TOP_RIGHT, "┐"], [Control.PRESET_BOTTOM_LEFT, "└"], [Control.PRESET_BOTTOM_RIGHT, "┘"]]:
+		var l := Label.new()
+		l.text = spec[1]
+		l.add_theme_font_size_override("font_size", 22)
+		l.add_theme_color_override("font_color", Color(0.0, 1.0, 0.3, 0.9))
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		parent.add_child(l)
+		l.set_anchors_and_offsets_preset(spec[0], Control.PRESET_MODE_MINSIZE)
+
 func _make_panel_style() -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.04, 0.09, 0.05, 0.97)
-	sb.border_color = Color(0.0, 1.0, 0.25, 0.5)
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(10)
-	sb.shadow_color = Color(0.0, 1.0, 0.25, 0.25)
-	sb.shadow_size = 24
+	sb.border_color = Color(0.0, 1.0, 0.3, 0.7)
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(6)
+	sb.shadow_color = Color(0.0, 1.0, 0.3, 0.55)
+	sb.shadow_size = 36
 	return sb
 
 func _make_button_style(color: Color) -> StyleBoxFlat:
