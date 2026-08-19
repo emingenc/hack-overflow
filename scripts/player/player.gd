@@ -46,6 +46,26 @@ var _invincible_timer: float = 0.0
 
 func _ready() -> void:
 	dash_trail.emitting = false
+	_spawn_ground_shadow()
+
+## Soft radial ground shadow — grounds the player against the neon tiles.
+func _spawn_ground_shadow() -> void:
+	var shadow := Sprite2D.new()
+	var gt := GradientTexture2D.new()
+	gt.fill = GradientTexture2D.FILL_RADIAL
+	gt.fill_from = Vector2(0.5, 0.5)
+	gt.fill_to = Vector2(0.5, 1.0)
+	gt.width = 64
+	gt.height = 64
+	var g := Gradient.new()
+	g.add_point(0.0, Color(0.0, 0.0, 0.0, 0.6))
+	g.add_point(1.0, Color(0.0, 0.0, 0.0, 0.0))
+	gt.gradient = g
+	shadow.texture = gt
+	shadow.position = Vector2(0, 14)
+	shadow.scale = Vector2(1.0, 0.38)
+	shadow.z_index = -1
+	add_child(shadow)
 
 func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
