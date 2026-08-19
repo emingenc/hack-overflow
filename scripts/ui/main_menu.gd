@@ -28,20 +28,46 @@ func _process(delta: float) -> void:
 	if _title:
 		var pulse := 0.85 + 0.15 * sin(_t * 2.0)
 		_title.modulate = Color(1, 1, 1, pulse)
+	# Parallax drift on the background layers (smooth oscillation, no wrap).
+	for i in range(_parallax_layers.size()):
+		var layer: TextureRect = _parallax_layers[i]
+		var amp: float = [8.0, 16.0, 28.0][i]    # far→near (near moves more)
+		var speed: float = [0.3, 0.5, 0.8][i]
+		layer.position.x = _parallax_base_x[i] + sin(_t * speed + i) * amp
+
+var _parallax_layers: Array[TextureRect] = []
+var _parallax_base_x: Array[float] = []
+
+## Layered tiled cyberpunk skyline with slow horizontal drift (depth cue).
+func _spawn_parallax_bg() -> void:
+	var texs := [
+		preload("res://assets/warped/bg-3.png"),  # far skyline
+		preload("res://assets/warped/bg-2.png"),  # mid buildings
+		preload("res://assets/warped/bg-1.png"),  # near structures
+	]
+	var alphas := [0.55, 0.65, 0.7]
+	var y_offsets := [40.0, 240.0, 520.0]
+	for i in range(texs.size()):
+		var layer := TextureRect.new()
+		layer.texture = texs[i]
+		layer.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		layer.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		layer.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+		layer.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		layer.modulate = Color(1, 1, 1, alphas[i])
+		layer.position = Vector2(0, y_offsets[i])
+		layer.custom_minimum_size = Vector2(get_viewport_rect().size.x + 60, texs[i].get_height() * 2.5)
+		add_child(layer)
+		_parallax_layers.append(layer)
+		_parallax_base_x.append(0.0)
 
 func _build_ui() -> void:
-	# Background: cyberpunk cityscape + dark overlay.
-	var bg_img := TextureRect.new()
-	bg_img.texture = preload("res://assets/sprites/city_bg.svg")
-	bg_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	bg_img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg_img.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg_img.modulate = Color(1, 1, 1, 0.5)
-	bg_img.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bg_img)
+	# 3-layer parallax cyberpunk background (Warped City) + dark overlay.
+	_spawn_parallax_bg()
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.03, 0.02, 0.8)
+	bg.color = Color(0.02, 0.03, 0.02, 0.45)  # lighter so the skyline shows through
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
@@ -64,6 +90,7 @@ func _build_ui() -> void:
 	subtitle.text = "// walk the route  ·  hack every firewall"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 18)
+	subtitle.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	subtitle.add_theme_color_override("font_color", Color(0.4, 0.8, 0.45))
 	subtitle.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	subtitle.position.y = 88
@@ -80,6 +107,7 @@ func _build_ui() -> void:
 	stats.text = "BLIND 75 ROUTE  ·  %d / %d SOLVED" % [_solved_total(), _total_puzzles()]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.add_theme_font_size_override("font_size", 16)
+	stats.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	stats.add_theme_color_override("font_color", Color(0.5, 0.85, 0.65))
 	stats.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	stats.position.y = -44
@@ -93,6 +121,7 @@ func _build_ui() -> void:
 		controls.text = "click a node to hack  ·  A/D · W/SPACE · S dash · E hack"
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls.add_theme_font_size_override("font_size", 14)
+	controls.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	controls.add_theme_color_override("font_color", Color(0.35, 0.7, 0.4))
 	controls.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	controls.position.y = -20
@@ -103,7 +132,7 @@ func _build_ui() -> void:
 	quit_btn.text = "QUIT"
 	quit_btn.custom_minimum_size = Vector2(120, 40)
 	quit_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	quit_btn.position = Vector2(-140, -36)
+	quit_btn.position = Vector2(-140, -44)
 	quit_btn.pressed.connect(func() -> void: get_tree().quit())
 	add_child(quit_btn)
 
