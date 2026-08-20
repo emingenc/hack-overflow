@@ -27,6 +27,9 @@ func _on_body_entered(body: Node2D) -> void:
 	AudioManager.play("chip")
 	if body.has_method("apply_powerup"):
 		body.apply_powerup(type)
+	var lvl := get_tree().current_scene
+	if lvl and lvl.has_method("add_trauma"):
+		lvl.add_trauma(0.3)
 	if Settings.particles_enabled:
 		_spawn_burst()
 	var tween := create_tween()
