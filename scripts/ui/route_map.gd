@@ -145,7 +145,7 @@ func _draw() -> void:
 			continue
 		var a := _screen_pos(_nodes[p]["iso"])
 		var b := _screen_pos(_nodes[i]["iso"])
-		_draw_edge(a, b, _is_walked(p, i))
+		_draw_edge(a, b, _is_walked(p, i), i)
 	# 2) All node FACES first (diamonds + side faces + glow rings).
 	for i in _nodes.size():
 		_draw_node_face(i)
@@ -168,16 +168,34 @@ func _draw_character_shadow() -> void:
 	draw_circle(Vector2.ZERO, 30.0, Color(0.0, 0.0, 0.0, 0.7))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-func _draw_edge(a: Vector2, b: Vector2, walked: bool) -> void:
+## Quadratic bezier point (route curves bow toward the viewer).
+func _quad(a: Vector2, c: Vector2, b: Vector2, t: float) -> Vector2:
+	var u := 1.0 - t
+	return u * u * a + 2.0 * u * t * c + t * t * b
+
+func _draw_edge(a: Vector2, b: Vector2, walked: bool, i: int) -> void:
 	var under := Color(0.04, 0.1, 0.05, 0.95)
 	var glow := Color(0.0, 1.0, 0.3, 0.6) if walked else Color(0.12, 0.22, 0.13, 0.85)
-	draw_line(a, b, under, 8.0, true)
-	draw_line(a, b, glow, 3.0, true)
-	# Stepping-stone diamonds along the route (gives it a "path" feel).
-	var steps := 6
-	for s in range(1, steps):
-		var p := a.lerp(b, float(s) / steps)
+	# Curved route (control point bows down) so edges read as raised roads,
+	# not straight sticks.
+	var mid := (a + b) * 0.5 + Vector2(0, 16)
+	var pts := PackedVector2Array()
+	for s in range(17):
+		pts.append(_quad(a, mid, b, float(s) / 16.0))
+	for s in range(pts.size() - 1):
+		draw_line(pts[s], pts[s + 1], under, 8.0, true)
+	for s in range(pts.size() - 1):
+		draw_line(pts[s], pts[s + 1], glow, 3.0, true)
+	# Stepping-stone diamonds along the route.
+	for s in range(1, 6):
+		var p := _quad(a, mid, b, float(s) / 6.0)
 		draw_rect(Rect2(p - Vector2(4, 4), Vector2(8, 8)), glow)
+	# Data pulse flowing along walked routes (phase per edge = flowing feel).
+	if walked:
+		var tt := fmod(_t * 0.35 + float(i) * 0.17, 1.0)
+		var p := _quad(a, mid, b, tt)
+		draw_circle(p, 4.5, Color(0.7, 1.0, 0.8, 0.95))
+		draw_circle(p, 9.0, Color(0.7, 1.0, 0.8, 0.25))
 
 func _draw_node_face(i: int) -> void:
 	var n: Dictionary = _nodes[i]
