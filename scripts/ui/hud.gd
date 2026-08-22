@@ -112,16 +112,42 @@ func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> voi
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
 
+	# Terminal panel behind the result (matches the puzzle modal aesthetic).
+	var panel := PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	var ps := StyleBoxFlat.new()
+	ps.bg_color = Color(0.04, 0.09, 0.05, 0.97)
+	ps.border_color = Color(0.0, 1.0, 0.3, 0.7)
+	ps.set_border_width_all(3)
+	ps.set_corner_radius_all(6)
+	ps.shadow_color = Color(0.0, 1.0, 0.3, 0.5)
+	ps.shadow_size = 36
+	ps.content_margin_left = 48
+	ps.content_margin_right = 48
+	ps.content_margin_top = 28
+	ps.content_margin_bottom = 28
+	panel.add_theme_stylebox_override("panel", ps)
+	add_child(panel)
+	for spec in [[Control.PRESET_TOP_LEFT, "┌"], [Control.PRESET_TOP_RIGHT, "┐"], [Control.PRESET_BOTTOM_LEFT, "└"], [Control.PRESET_BOTTOM_RIGHT, "┘"]]:
+		var l := Label.new()
+		l.text = spec[1]
+		l.add_theme_font_size_override("font_size", 22)
+		l.add_theme_color_override("font_color", Color(0.0, 1.0, 0.3, 0.9))
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(l)
+		l.set_anchors_and_offsets_preset(spec[0], Control.PRESET_MODE_MINSIZE)
+
 	var center := VBoxContainer.new()
-	center.set_anchors_preset(Control.PRESET_CENTER)
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_theme_constant_override("separation", 16)
-	add_child(center)
+	panel.add_child(center)
 
 	var big := Label.new()
-	big.text = "SECTOR CLEARED ✓"
+	big.text = "SECTOR CLEARED"
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big.add_theme_font_size_override("font_size", 42)
+	big.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	big.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	center.add_child(big)
 
@@ -129,6 +155,7 @@ func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> voi
 	stats.text = "CHIPS %d/%d   ·   TIME %.1fs   ·   PUZZLE SOLVED" % [chips, total, time_seconds]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.add_theme_font_size_override("font_size", 18)
+	stats.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	stats.add_theme_color_override("font_color", Color(0.75, 1.0, 0.6))
 	center.add_child(stats)
 
