@@ -6,6 +6,7 @@ extends Node2D
 ##   =  = platform (solid block — jump through not supported in v1)
 ##   ^  = spike hazard
 ##   D  = patrol drone
+##   V  = vertical patrol drone
 ##   T  = firewall turret
 ##   C  = data chip
 ##   F  = firewall terminal (checkpoint / puzzle)
@@ -178,6 +179,8 @@ func _build_from_map() -> void:
 					_spawn_hazard(cell)
 				"D":
 					_spawn_drone(cell)
+				"V":
+					_spawn_drone(cell, true)
 				"T":
 					_spawn_turret(cell)
 				"C":
@@ -342,8 +345,9 @@ func _spawn_hazard(cell: Vector2i) -> void:
 		if body is Player:
 			body.die())
 
-func _spawn_drone(cell: Vector2i) -> void:
+func _spawn_drone(cell: Vector2i, vertical: bool = false) -> void:
 	var drone := PatrolDrone.new()
+	drone.vertical = vertical
 	drone.position = Vector2(cell) * TILE_SIZE + Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 	drone.patrol_distance = TILE_SIZE * 2.0
 	var spr := Sprite2D.new()
