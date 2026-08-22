@@ -39,7 +39,7 @@ const _LAYOUT := [
 	["Intervals", -2.5, 3, 3],
 	["Graphs", -0.5, 3, 4],
 	["Design", 0.5, 3, 5],
-	["Easter Egg", 2.5, 3, 6],
+	["???", 2.5, 3, 6],
 ]
 
 const COL_SPACING := 300.0   # px per column unit (drives iso lattice spacing)
@@ -191,11 +191,11 @@ func _draw_edge(a: Vector2, b: Vector2, walked: bool, i: int) -> void:
 		var p := _quad(a, mid, b, float(s) / 6.0)
 		draw_rect(Rect2(p - Vector2(4, 4), Vector2(8, 8)), glow)
 	# Data pulse flowing along walked routes (phase per edge = flowing feel).
+	# Kept subtle — heavy animated dots read as "buggy" icons on the menu.
 	if walked:
 		var tt := fmod(_t * 0.35 + float(i) * 0.17, 1.0)
 		var p := _quad(a, mid, b, tt)
-		draw_circle(p, 6.5, Color(0.7, 1.0, 0.8, 0.95))
-		draw_circle(p, 12.0, Color(0.7, 1.0, 0.8, 0.25))
+		draw_circle(p, 3.0, Color(0.7, 1.0, 0.8, 0.6))
 
 func _draw_node_face(i: int) -> void:
 	var n: Dictionary = _nodes[i]
@@ -225,13 +225,6 @@ func _draw_node_face(i: int) -> void:
 			top = Color(0.07, 0.24, 0.1, 0.98).lerp(Color(0.1, 0.4, 0.16, 0.99), pulse)
 			side = Color(0.04, 0.12, 0.06, 0.98).lerp(Color(0.06, 0.2, 0.1, 0.99), pulse)
 			border = Color(0.0, 1.0, 0.25, 0.85 if hovered else 0.6)
-
-	# Soft drop shadow under the tile — grounds it, adds height/depth.
-	var sh_off := Vector2(7, 10)
-	draw_colored_polygon(PackedVector2Array([
-		c + sh_off + Vector2(0, -hh), c + sh_off + Vector2(hw, 0),
-		c + sh_off + Vector2(0, hh), c + sh_off + Vector2(-hw, 0),
-	]), Color(0.0, 0.0, 0.0, 0.35))
 
 	# Isometric thickness (side faces).
 	var thick := 10.0
