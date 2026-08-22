@@ -19,9 +19,13 @@ func _ready() -> void:
 	# Tint the panel background, NOT the node modulate — modulating the bar
 	# multiplies every child label into near-black and blanks the HUD.
 	var bar_style := StyleBoxFlat.new()
-	bar_style.bg_color = Color(0.03, 0.09, 0.05, 0.9)
-	bar_style.border_color = Color(0.0, 1.0, 0.25, 0.35)
+	bar_style.bg_color = Color(0.03, 0.09, 0.05, 0.92)
+	bar_style.border_color = Color(0.0, 1.0, 0.25, 0.6)
 	bar_style.set_border_width_all(1)
+	bar_style.set_border_width_bottom(3)  # terminal separator line
+	bar_style.shadow_color = Color(0.0, 1.0, 0.3, 0.35)
+	bar_style.shadow_size = 12
+	bar_style.shadow_offset = Vector2(0, 4)
 	bar_style.content_margin_top = 5
 	bar_style.content_margin_bottom = 5
 	bar.add_theme_stylebox_override("panel", bar_style)
@@ -35,15 +39,18 @@ func _ready() -> void:
 	_name_label = Label.new()
 	_name_label.text = "SECTOR: " + level_name
 	_name_label.add_theme_font_size_override("font_size", 18)
+	_name_label.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	_name_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	hbox.add_child(_name_label)
 
 	_chips_label = Label.new()
 	_chips_label.add_theme_font_size_override("font_size", 18)
+	_chips_label.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	hbox.add_child(_chips_label)
 
 	_time_label = Label.new()
 	_time_label.add_theme_font_size_override("font_size", 18)
+	_time_label.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	hbox.add_child(_time_label)
 
 	# Combo streak label (floats under the top bar, hidden until 2+ chained).
