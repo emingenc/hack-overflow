@@ -151,4 +151,6 @@ func _solved_total() -> int:
 ## Launch a level pinned to a specific Blind-75 category.
 func _launch_category(cat: String) -> void:
 	GameManager.pending_category = cat
+	if not is_inside_tree():
+		return
 	get_tree().change_scene_to_file(GameManager.LEVELS[0])

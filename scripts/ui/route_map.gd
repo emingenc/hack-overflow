@@ -24,6 +24,7 @@ var _char_from := Vector2.ZERO
 var _char_to := Vector2.ZERO
 var _char_anim := 1.0                # 0..1 walk progress (1 = idle at target)
 var _hover := -1
+var _launching := false
 var _t := 0.0
 
 # Tree layout: [category, col, row, parent_index].
@@ -297,11 +298,16 @@ func _gui_input(event: InputEvent) -> void:
 		_tap_node(_node_at(event.position))
 
 func _tap_node(idx: int) -> void:
+	if _launching:
+		return
 	if idx < 0 or _nodes[idx]["state"] == LOCKED:
 		return
+	_launching = true
 	_walk_to(idx)
 	var cat: String = _nodes[idx]["cat"]
 	get_tree().create_timer(0.2).timeout.connect(func() -> void:
+		if not is_inside_tree():
+			return
 		category_launched.emit(cat))
 
 func _node_at(p: Vector2) -> int:
