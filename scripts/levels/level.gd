@@ -31,6 +31,8 @@ var _puzzle_ui: PuzzleUI = null
 var _hud: Control = null
 var _level_time: float = 0.0
 var _level_active: bool = false
+var _combo: int = 0
+var _combo_timer: float = 0.0
 var _completed: bool = false
 var _cam: Camera2D = null
 var _shake: Node = null
@@ -128,6 +130,12 @@ func _build_parallax() -> void:
 func _process(delta: float) -> void:
 	if _level_active and not _completed:
 		_level_time += delta
+	if _combo_timer > 0.0:
+		_combo_timer -= delta
+		if _combo_timer <= 0.0:
+			_combo = 0
+			if _hud:
+				_hud.clear_combo()
 	_update_parallax()
 	_update_camera(delta)
 
@@ -487,8 +495,12 @@ func _on_puzzle_completed(success: bool) -> void:
 
 func on_chip_collected(value: int) -> void:
 	chips_collected_count += value
+	# Combo streak — chips chained within 2s multiply the buzz.
+	_combo = _combo + 1 if _combo_timer > 0.0 else 1
+	_combo_timer = 2.0
 	if _hud:
 		_hud.update_chips(chips_collected_count, chips_total)
+		_hud.show_combo(_combo)
 
 func _on_exit_entered(body: Node2D) -> void:
 	if body is Player and not _completed:

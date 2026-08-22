@@ -8,6 +8,7 @@ var _chips_label: Label
 var _time_label: Label
 var _name_label: Label
 var _complete_overlay: Control
+var _combo_label: Label
 
 func _ready() -> void:
 	# Top bar
@@ -45,6 +46,16 @@ func _ready() -> void:
 	_time_label.add_theme_font_size_override("font_size", 18)
 	hbox.add_child(_time_label)
 
+	# Combo streak label (floats under the top bar, hidden until 2+ chained).
+	_combo_label = Label.new()
+	_combo_label.add_theme_font_size_override("font_size", 22)
+	_combo_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	_combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combo_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_combo_label.position.y = 56
+	_combo_label.visible = false
+	add_child(_combo_label)
+
 	# Controls hint (bottom)
 	var hint := Label.new()
 	hint.text = "A/D or DPAD move · W/SPACE or A jump (double!) · S or X dash · E or B interact"
@@ -73,6 +84,19 @@ func update_chips(collected: int, total: int) -> void:
 	if _chips_label:
 		_chips_label.text = "CHIPS  %d/%d" % [collected, total]
 		_chips_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.6))
+
+func show_combo(n: int) -> void:
+	if n < 2:
+		_combo_label.visible = false
+		return
+	_combo_label.text = "COMBO x%d" % n
+	_combo_label.visible = true
+	_combo_label.scale = Vector2(1.25, 1.25)
+	var tw := create_tween()
+	tw.tween_property(_combo_label, "scale", Vector2.ONE, 0.12)
+
+func clear_combo() -> void:
+	_combo_label.visible = false
 
 func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> void:
 	# Level complete overlay
