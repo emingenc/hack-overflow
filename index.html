@@ -205,6 +205,8 @@ const engine = new Engine(GODOT_CONFIG);
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
 					statusProgress.max = total;
+					statusNotice.textContent = 'DOWNLOADING ' + (current/1048576).toFixed(1) + ' / ' + (total/1048576).toFixed(1) + ' MB (' + Math.round(current/total*100) + '%) — first load grabs the engine (~40MB), next visits are instant';
+					statusNotice.style.display = 'block';
 				} else {
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
