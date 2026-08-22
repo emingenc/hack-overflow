@@ -22,7 +22,7 @@ func _ready() -> void:
 	bar_style.bg_color = Color(0.03, 0.09, 0.05, 0.92)
 	bar_style.border_color = Color(0.0, 1.0, 0.25, 0.6)
 	bar_style.set_border_width_all(1)
-	bar_style.set_border_width_bottom(3)  # terminal separator line
+	bar_style.border_width_bottom = 3  # terminal separator line
 	bar_style.shadow_color = Color(0.0, 1.0, 0.3, 0.35)
 	bar_style.shadow_size = 12
 	bar_style.shadow_offset = Vector2(0, 4)

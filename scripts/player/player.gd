@@ -47,6 +47,13 @@ var _invincible_timer: float = 0.0
 func _ready() -> void:
 	dash_trail.emitting = false
 
+func _draw() -> void:
+	# Soft ground shadow — drawn in the player's canvas (behind the sprite,
+	# which is a child rendered on top). Same safe pattern as the route map.
+	draw_set_transform(Vector2(0, 13), 0.0, Vector2(1.0, 0.34))
+	draw_circle(Vector2.ZERO, 24.0, Color(0.0, 0.0, 0.0, 0.45))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	# Powerup timers
