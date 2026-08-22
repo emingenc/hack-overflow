@@ -385,6 +385,13 @@ func get_puzzle_for_level(level_index: int) -> Dictionary:
 			for p in pool:
 				if p.get("category", "") == cat:
 					filtered.append(p)
+			if filtered.is_empty():
+				# Defensive: category has no puzzles — draw any unseen, else any.
+				for p in pool:
+					if not session_seen.has(p["id"]):
+						filtered.append(p)
+				if filtered.is_empty():
+					filtered = pool.duplicate()
 		var c: Dictionary = filtered[randi_range(0, filtered.size() - 1)]
 		session_seen.append(c["id"])
 		return c
