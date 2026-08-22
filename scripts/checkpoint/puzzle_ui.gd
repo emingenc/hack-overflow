@@ -147,8 +147,22 @@ func _build_ui() -> void:
 	# CRITICAL: wrap the problem text or it clips past the panel edge on phones.
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_desc_label.add_theme_font_size_override("normal_font_size", 21)
+	_desc_label.add_theme_font_override("normal_font", preload("res://assets/fonts/VT323-Regular.ttf"))
 	_desc_label.add_theme_color_override("default_color", Color(0.85, 1.0, 0.7))
-	vbox.add_child(_desc_label)
+	# Terminal code-block panel around the problem text.
+	var desc_panel := PanelContainer.new()
+	var ds := StyleBoxFlat.new()
+	ds.bg_color = Color(0.02, 0.06, 0.03, 0.85)
+	ds.border_color = Color(0.0, 1.0, 0.25, 0.2)
+	ds.set_border_width_all(1)
+	ds.set_corner_radius_all(4)
+	ds.content_margin_left = 12
+	ds.content_margin_right = 12
+	ds.content_margin_top = 8
+	ds.content_margin_bottom = 8
+	desc_panel.add_theme_stylebox_override("panel", ds)
+	desc_panel.add_child(_desc_label)
+	vbox.add_child(desc_panel)
 
 	# Options — wrapped in a scroll area so tall ORDER layouts don't push the
 	# panel (and the submit/exit buttons) below the fold on short screens.
