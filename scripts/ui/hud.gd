@@ -152,7 +152,7 @@ func show_complete(idx: int, time_seconds: float, chips: int, total: int) -> voi
 	center.add_child(big)
 
 	var stats := Label.new()
-	stats.text = "CHIPS %d/%d   ·   TIME %.1fs   ·   PUZZLE SOLVED" % [chips, total, time_seconds]
+	stats.text = "CHIPS %d/%d   |   TIME %.1fs   |   PUZZLE SOLVED" % [chips, total, time_seconds]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.add_theme_font_size_override("font_size", 18)
 	stats.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))

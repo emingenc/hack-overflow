@@ -87,7 +87,7 @@ func _build_ui() -> void:
 	add_child(_title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// walk the route  ·  hack every firewall"
+	subtitle.text = "// walk the route  |  hack every firewall"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 18)
 	subtitle.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
@@ -104,7 +104,7 @@ func _build_ui() -> void:
 
 	# Stats (bottom).
 	var stats := Label.new()
-	stats.text = "BLIND 75 ROUTE  ·  %d / %d SOLVED" % [_solved_total(), _total_puzzles()]
+	stats.text = "BLIND 75 ROUTE  |  %d / %d SOLVED" % [_solved_total(), _total_puzzles()]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.add_theme_font_size_override("font_size", 16)
 	stats.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))
@@ -116,9 +116,9 @@ func _build_ui() -> void:
 	# Controls hint (bottom).
 	var controls := Label.new()
 	if DisplayServer.is_touchscreen_available():
-		controls.text = "tap a node to hack  ·  ◀ ▶ ▲  in-level"
+		controls.text = "tap a node to hack  |  ◀ ▶ ▲  in-level"
 	else:
-		controls.text = "click a node to hack  ·  A/D · W/SPACE · S dash · E hack"
+		controls.text = "click a node to hack  |  A/D · W/SPACE · S dash · E hack"
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls.add_theme_font_size_override("font_size", 14)
 	controls.add_theme_font_override("font", preload("res://assets/fonts/VT323-Regular.ttf"))

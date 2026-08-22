@@ -59,22 +59,22 @@ func _spawn_matrix_rain() -> void:
 func _spawn_ambient_particles() -> void:
 	if not Settings.particles_enabled:
 		return
-	var p := GPUParticles2D.new()
+	# CPU particles: GPUParticles2D can crash the WebGL build with a wasm
+	# "memory access out of bounds" on level load — CPU path is safe everywhere.
+	var p := CPUParticles2D.new()
 	p.amount = 24
 	p.lifetime = 3.0
 	p.position = Vector2(_map_pixel_width() * 0.5, _map_pixel_height() * 0.5)
-	var mat := ParticleProcessMaterial.new()
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	mat.emission_box_extents = Vector3(_map_pixel_width() * 0.4, _map_pixel_height() * 0.4, 1.0)
-	mat.direction = Vector3(0, -1, 0)
-	mat.spread = 20.0
-	mat.initial_velocity_min = 40.0
-	mat.initial_velocity_max = 130.0
-	mat.gravity = Vector3.ZERO
-	mat.scale_min = 1.0
-	mat.scale_max = 2.5
-	mat.color = Color(0.35, 1.0, 0.6)
-	p.process_material = mat
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(_map_pixel_width() * 0.4, _map_pixel_height() * 0.4)
+	p.direction = Vector2(0, -1)
+	p.spread = 20.0
+	p.gravity = Vector2.ZERO
+	p.initial_velocity_min = 40.0
+	p.initial_velocity_max = 130.0
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 2.5
+	p.color = Color(0.35, 1.0, 0.6)
 	var cm := CanvasItemMaterial.new()
 	cm.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	p.material = cm
