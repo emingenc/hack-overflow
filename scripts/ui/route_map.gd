@@ -178,7 +178,7 @@ func _draw_edge(a: Vector2, b: Vector2, walked: bool, i: int) -> void:
 	var glow := Color(0.0, 1.0, 0.3, 0.6) if walked else Color(0.12, 0.22, 0.13, 0.85)
 	# Curved route (control point bows down) so edges read as raised roads,
 	# not straight sticks.
-	var mid := (a + b) * 0.5 + Vector2(0, 16)
+	var mid := (a + b) * 0.5 + Vector2(0, 28)
 	var pts := PackedVector2Array()
 	for s in range(17):
 		pts.append(_quad(a, mid, b, float(s) / 16.0))
@@ -194,8 +194,8 @@ func _draw_edge(a: Vector2, b: Vector2, walked: bool, i: int) -> void:
 	if walked:
 		var tt := fmod(_t * 0.35 + float(i) * 0.17, 1.0)
 		var p := _quad(a, mid, b, tt)
-		draw_circle(p, 4.5, Color(0.7, 1.0, 0.8, 0.95))
-		draw_circle(p, 9.0, Color(0.7, 1.0, 0.8, 0.25))
+		draw_circle(p, 6.5, Color(0.7, 1.0, 0.8, 0.95))
+		draw_circle(p, 12.0, Color(0.7, 1.0, 0.8, 0.25))
 
 func _draw_node_face(i: int) -> void:
 	var n: Dictionary = _nodes[i]
@@ -225,6 +225,13 @@ func _draw_node_face(i: int) -> void:
 			top = Color(0.07, 0.24, 0.1, 0.98).lerp(Color(0.1, 0.4, 0.16, 0.99), pulse)
 			side = Color(0.04, 0.12, 0.06, 0.98).lerp(Color(0.06, 0.2, 0.1, 0.99), pulse)
 			border = Color(0.0, 1.0, 0.25, 0.85 if hovered else 0.6)
+
+	# Soft drop shadow under the tile — grounds it, adds height/depth.
+	var sh_off := Vector2(7, 10)
+	draw_colored_polygon(PackedVector2Array([
+		c + sh_off + Vector2(0, -hh), c + sh_off + Vector2(hw, 0),
+		c + sh_off + Vector2(0, hh), c + sh_off + Vector2(-hw, 0),
+	]), Color(0.0, 0.0, 0.0, 0.35))
 
 	# Isometric thickness (side faces).
 	var thick := 10.0
@@ -269,17 +276,17 @@ func _draw_node_label(i: int) -> void:
 	var label_color := Color(0.78, 1.0, 0.82)
 	match state:
 		SOLVED:
-			prefix = "[DONE] "
+			prefix = ""      # bright green panel + color already says "cleared"
 			label_color = Color(0.3, 1.0, 0.5)
 		AVAILABLE:
 			prefix = "> "
 			label_color = Color(0.9, 1.0, 0.6)
 		LOCKED:
-			prefix = "[LOCKED] "
+			prefix = ""
 			label_color = Color(0.55, 0.6, 0.55)
 	label = prefix + label
 	# Smaller font + tighter panel so labels don't reach a neighbor diamond.
-	var fsize := 18
+	var fsize := 20
 	var tw := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize).x
 	var pad := 5.0
 	var panel_rect := Rect2(c.x - tw * 0.5 - pad, c.y + hh + thick + 10, tw + pad * 2, fsize + pad)
