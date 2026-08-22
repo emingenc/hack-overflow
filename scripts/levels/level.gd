@@ -471,6 +471,7 @@ func _on_puzzle_started(_level_idx: int) -> void:
 	# Reaching the firewall sets the checkpoint.
 	if firewall:
 		_respawn_point = firewall.position + Vector2(0, 24)
+		AudioManager.play("checkpoint")
 	if _puzzle_ui:
 		if not _puzzle_ui.puzzle_completed.is_connected(_on_puzzle_completed):
 			_puzzle_ui.puzzle_completed.connect(_on_puzzle_completed)
